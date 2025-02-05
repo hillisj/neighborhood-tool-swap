@@ -25,12 +25,24 @@ const fetchTools = async () => {
   if (error) throw error;
   
   // Process the data to include pending requests information
-  return data.map(tool => ({
+  const processedTools = data.map(tool => ({
     ...tool,
     status: tool.tool_requests?.some(request => request.status === 'pending')
       ? 'requested'
       : tool.status
   }));
+
+  // Sort tools by status in the specified order
+  const statusOrder = {
+    'available': 0,
+    'requested': 1,
+    'checked_out': 2
+  };
+
+  return processedTools.sort((a, b) => 
+    statusOrder[a.status as keyof typeof statusOrder] - 
+    statusOrder[b.status as keyof typeof statusOrder]
+  );
 };
 
 const Index = () => {
@@ -137,3 +149,4 @@ const Index = () => {
 };
 
 export default Index;
+
