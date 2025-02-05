@@ -42,27 +42,48 @@ export const OwnedTools = () => {
     return <div className="text-center text-gray-500">Loading your tools...</div>;
   }
 
-  return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-medium">Your Tools</h2>
-      <div className="grid gap-4">
-        {ownedTools?.map((tool) => (
-          <ToolCard
-            key={tool.id}
-            id={tool.id}
-            name={tool.name}
-            description={tool.description}
-            imageUrl={tool.image_url || "/placeholder.svg"}
-            owner={tool.profiles?.username || tool.profiles?.email?.split('@')[0] || 'Anonymous'}
-            status={tool.status}
-          />
-        ))}
-        {ownedTools?.length === 0 && (
-          <p className="text-center text-gray-500">
-            You haven't added any tools yet.
-          </p>
-        )}
+  // Group tools by status
+  const checkedOutTools = ownedTools?.filter(tool => tool.status === 'checked_out') || [];
+  const requestedTools = ownedTools?.filter(tool => tool.status === 'requested') || [];
+  const availableTools = ownedTools?.filter(tool => tool.status === 'available') || [];
+
+  const renderToolSection = (tools: typeof ownedTools, title: string) => {
+    if (!tools || tools.length === 0) return null;
+    
+    return (
+      <div className="space-y-4">
+        <h3 className="text-md font-medium text-gray-600">{title}</h3>
+        <div className="grid gap-4">
+          {tools.map((tool) => (
+            <ToolCard
+              key={tool.id}
+              id={tool.id}
+              name={tool.name}
+              description={tool.description}
+              imageUrl={tool.image_url || "/placeholder.svg"}
+              owner={tool.profiles?.username || tool.profiles?.email?.split('@')[0] || 'Anonymous'}
+              status={tool.status}
+            />
+          ))}
+        </div>
       </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-lg font-medium">Your Tools</h2>
+      {checkedOutTools.length === 0 && requestedTools.length === 0 && availableTools.length === 0 ? (
+        <p className="text-center text-gray-500">
+          You haven't added any tools yet.
+        </p>
+      ) : (
+        <div className="space-y-8">
+          {renderToolSection(checkedOutTools, "Checked Out")}
+          {renderToolSection(requestedTools, "Requested")}
+          {renderToolSection(availableTools, "Available")}
+        </div>
+      )}
     </div>
   );
 };
