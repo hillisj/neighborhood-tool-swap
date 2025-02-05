@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const ToolDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: tool, isLoading: loadingTool } = useQuery({
     queryKey: ['tool', id],
@@ -87,7 +88,6 @@ const ToolDetail = () => {
     },
   });
 
-  // Check if there are any pending requests
   const hasPendingRequests = requests.some(request => request.status === 'pending');
 
   const handleMarkReturned = async () => {
@@ -105,6 +105,11 @@ const ToolDetail = () => {
       toast.error("Failed to mark tool as returned");
       return;
     }
+    
+    // Invalidate queries to refresh the data
+    queryClient.invalidateQueries({ queryKey: ['tool', id] });
+    queryClient.invalidateQueries({ queryKey: ['tool-requests', id] });
+    queryClient.invalidateQueries({ queryKey: ['active-checkout', id] });
     
     toast.success("Tool marked as returned successfully");
   };
@@ -125,6 +130,11 @@ const ToolDetail = () => {
       return;
     }
     
+    // Invalidate queries to refresh the data
+    queryClient.invalidateQueries({ queryKey: ['tool', id] });
+    queryClient.invalidateQueries({ queryKey: ['tool-requests', id] });
+    queryClient.invalidateQueries({ queryKey: ['active-checkout', id] });
+    
     toast.success("Request approved successfully");
   };
 
@@ -138,6 +148,10 @@ const ToolDetail = () => {
       toast.error("Failed to reject request");
       return;
     }
+    
+    // Invalidate queries to refresh the data
+    queryClient.invalidateQueries({ queryKey: ['tool', id] });
+    queryClient.invalidateQueries({ queryKey: ['tool-requests', id] });
     
     toast.success("Request rejected successfully");
   };
