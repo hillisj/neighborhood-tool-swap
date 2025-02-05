@@ -7,6 +7,7 @@ import { ToolDetailHeader } from "@/components/tool-detail/ToolDetailHeader";
 import { ToolDetailSkeleton } from "@/components/tool-detail/ToolDetailSkeleton";
 import { ToolDetailInfo } from "@/components/tool-detail/ToolDetailInfo";
 import { ToolRequests } from "@/components/tool-detail/ToolRequests";
+import { BottomNav } from "@/components/BottomNav";
 
 const ToolDetail = () => {
   const { id } = useParams();
@@ -114,7 +115,12 @@ const ToolDetail = () => {
   };
 
   if (loadingTool) {
-    return <ToolDetailSkeleton />;
+    return (
+      <>
+        <ToolDetailSkeleton />
+        <BottomNav />
+      </>
+    );
   }
 
   if (!tool) {
@@ -126,6 +132,7 @@ const ToolDetail = () => {
             Go back
           </Button>
         </div>
+        <BottomNav />
       </div>
     );
   }
@@ -133,7 +140,7 @@ const ToolDetail = () => {
   const isOwner = currentUser?.id === tool.owner_id;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <div className="max-w-2xl mx-auto p-4">
         <ToolDetailHeader />
 
@@ -157,6 +164,7 @@ const ToolDetail = () => {
           )}
         </div>
       </div>
+      <BottomNav />
     </div>
   );
 };
