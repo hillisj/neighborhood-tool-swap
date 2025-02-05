@@ -15,16 +15,23 @@ const fetchTools = async () => {
       profiles:owner_id (
         username,
         email
+      ),
+      tool_requests (
+        status
       )
     `)
-    .eq('status', 'available')
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data;
+  
+  // Process the data to include pending requests information
+  return data.map(tool => ({
+    ...tool,
+    status: tool.tool_requests?.some(request => request.status === 'pending')
+      ? 'requested'
+      : tool.status
+  }));
 };
-
-// ... keep existing code (auth and profile management)
 
 const Index = () => {
   const { data: tools, isLoading } = useQuery({
