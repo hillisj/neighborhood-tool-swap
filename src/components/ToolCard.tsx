@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,39 +23,13 @@ export const ToolCard = ({
   description,
   imageUrl,
   owner,
-  status: initialStatus,
+  status,
   requiresAuth,
 }: ToolCardProps) => {
   const [isRequesting, setIsRequesting] = useState(false);
-  const [toolStatus, setToolStatus] = useState(initialStatus);
   const [isOwner, setIsOwner] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkToolStatus = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: tool } = await supabase
-        .from('tools')
-        .select('owner_id, status')
-        .eq('id', id)
-        .maybeSingle();
-      
-      if (tool) {
-        setIsOwner(tool.owner_id === user.id);
-        setToolStatus(tool.status);
-      }
-    };
-
-    checkToolStatus();
-  }, [id]);
-
-  // Update local status when prop changes
-  useEffect(() => {
-    setToolStatus(initialStatus);
-  }, [initialStatus]);
 
   const handleRequestCheckout = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -108,7 +82,6 @@ export const ToolCard = ({
         }
       } else {
         toast.success("Request sent successfully");
-        setToolStatus("requested");
         queryClient.invalidateQueries({ queryKey: ['tools'] });
       }
     } catch (error: any) {
@@ -130,7 +103,7 @@ export const ToolCard = ({
       <ToolImage
         imageUrl={imageUrl}
         name={name}
-        status={toolStatus}
+        status={status}
       />
       <div className="p-4">
         <h3 className="font-semibold text-lg">{name}</h3>
@@ -140,7 +113,7 @@ export const ToolCard = ({
           <ToolCardActions
             isOwner={isOwner}
             toolId={id}
-            toolStatus={toolStatus}
+            toolStatus={status}
             isRequesting={isRequesting}
             requiresAuth={requiresAuth}
             onRequestCheckout={handleRequestCheckout}

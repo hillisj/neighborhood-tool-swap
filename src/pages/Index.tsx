@@ -12,10 +12,6 @@ const fetchTools = async () => {
     .from('tools')
     .select(`
       *,
-      tool_requests (
-        status,
-        id
-      ),
       profiles:owner_id (
         username,
         email
