@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { ToolDetailHeader } from "@/components/tool-detail/ToolDetailHeader";
 import { ToolDetailSkeleton } from "@/components/tool-detail/ToolDetailSkeleton";
 import { ToolDetailInfo } from "@/components/tool-detail/ToolDetailInfo";
@@ -202,13 +203,6 @@ const ToolDetail = () => {
             className="w-full h-64 object-cover"
           />
           
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold text-gray-900">{tool.name}</h1>
-              {isOwner && <DeleteToolDialog onDelete={handleDeleteTool} />}
-            </div>
-          </div>
-          
           <ToolDetailInfo tool={tool} hasPendingRequests={hasPendingRequests} />
 
           {isOwner && tool.status === 'checked_out' && activeCheckout && (
@@ -227,6 +221,8 @@ const ToolDetail = () => {
               toolName={tool.name}
             />
           )}
+
+          {isOwner && <DeleteToolDialog onDelete={handleDeleteTool} />}
         </div>
       </div>
       <BottomNav />
