@@ -41,7 +41,7 @@ export const ToolCard = ({
         .from('tools')
         .select('owner_id')
         .eq('id', id)
-        .single();
+        .maybeSingle();
       
       setIsOwner(tool?.owner_id === user.id);
     };
