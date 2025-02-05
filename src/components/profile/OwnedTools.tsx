@@ -72,7 +72,6 @@ export const OwnedTools = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-medium">Your Tools</h2>
       {checkedOutTools.length === 0 && requestedTools.length === 0 && availableTools.length === 0 ? (
         <p className="text-center text-gray-500">
           You haven't added any tools yet.
