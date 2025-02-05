@@ -23,11 +23,11 @@ export const ToolCard = ({
   description,
   imageUrl,
   owner,
-  status,
+  status: initialStatus,
   requiresAuth,
 }: ToolCardProps) => {
   const [isRequesting, setIsRequesting] = useState(false);
-  const [toolStatus, setToolStatus] = useState(status);
+  const [toolStatus, setToolStatus] = useState(initialStatus);
   const [isOwner, setIsOwner] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -39,15 +39,23 @@ export const ToolCard = ({
 
       const { data: tool } = await supabase
         .from('tools')
-        .select('owner_id')
+        .select('owner_id, status')
         .eq('id', id)
         .maybeSingle();
       
       setIsOwner(tool?.owner_id === user.id);
+      if (tool?.status) {
+        setToolStatus(tool.status);
+      }
     };
 
     checkToolStatus();
   }, [id]);
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setToolStatus(initialStatus);
+  }, [initialStatus]);
 
   const handleRequestCheckout = async (e: React.MouseEvent) => {
     e.stopPropagation();
