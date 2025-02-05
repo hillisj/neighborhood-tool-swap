@@ -50,6 +50,7 @@ export const ToolCard = ({
       
       setIsOwner(tool?.owner_id === user.id);
 
+      // Check if there's a pending request by the current user
       const { data: requests } = await supabase
         .from('tool_requests')
         .select()
@@ -58,15 +59,25 @@ export const ToolCard = ({
         .eq('status', 'pending')
         .maybeSingle();
 
+      // Check if tool is checked out (has an approved request)
+      const { data: activeCheckout } = await supabase
+        .from('tool_requests')
+        .select()
+        .eq('tool_id', id)
+        .eq('status', 'approved')
+        .maybeSingle();
+
       if (requests) {
         setToolStatus("requested");
+      } else if (activeCheckout) {
+        setToolStatus("checked-out");
       } else {
-        setToolStatus(isAvailable ? "available" : "checked-out");
+        setToolStatus("available");
       }
     };
 
     checkToolStatus();
-  }, [id, isAvailable]);
+  }, [id]);
 
   const getStatusBadge = (status: ToolStatus) => {
     switch (status) {
