@@ -136,20 +136,34 @@ export const ToolCard = ({
         <p className="text-sm text-gray-600 mt-2">{description}</p>
         <div className="mt-4 flex items-center justify-between">
           <p className="text-sm text-gray-500">Owner: {owner}</p>
-          {toolStatus === "available" && !isOwner && (
+          {isOwner ? (
             <Button
               variant="default"
               size="sm"
-              onClick={handleRequestCheckout}
-              disabled={isRequesting}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/tool/${id}`);
+              }}
               className="bg-accent hover:bg-accent/90"
             >
-              {isRequesting 
-                ? "Requesting..." 
-                : requiresAuth 
-                  ? "Sign in to Request" 
-                  : "Request"}
+              Manage Tool
             </Button>
+          ) : (
+            toolStatus === "available" && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleRequestCheckout}
+                disabled={isRequesting}
+                className="bg-accent hover:bg-accent/90"
+              >
+                {isRequesting 
+                  ? "Requesting..." 
+                  : requiresAuth 
+                    ? "Sign in to Request" 
+                    : "Request"}
+              </Button>
+            )
           )}
         </div>
       </div>
