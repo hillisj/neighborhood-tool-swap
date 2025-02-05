@@ -35,6 +35,7 @@ export const ToolRequests = ({
             avatarUrl={request.profiles?.avatar_url}
             onApprove={() => onApprove(request.id)}
             onReject={() => onReject(request.id)}
+            updatedAt={request.updated_at}
           />
         ))}
       </div>
