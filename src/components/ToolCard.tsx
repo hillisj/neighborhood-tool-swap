@@ -44,7 +44,7 @@ export const ToolCard = ({
         .eq('tool_id', id)
         .eq('requester_id', user.id)
         .eq('status', 'pending')
-        .single();
+        .maybeSingle();
 
       setHasPendingRequest(!!requests);
     };
