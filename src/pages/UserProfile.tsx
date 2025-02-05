@@ -19,7 +19,6 @@ const UserProfile = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast: toastNotification } = useToast();
   const navigate = useNavigate();
-  const fileInputRef = useState<HTMLInputElement | null>(null);
 
   const { data: profile, refetch } = useQuery({
     queryKey: ['user-profile'],
@@ -88,7 +87,6 @@ const UserProfile = () => {
   };
 
   const handleAvatarClick = () => {
-    // Create a hidden file input and trigger it
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -107,9 +105,9 @@ const UserProfile = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Create a unique file name
+      // Create a unique file name with user-specific folder
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+      const fileName = `${user.id}/${Math.random()}.${fileExt}`;
 
       // Upload the file to Supabase storage
       const { error: uploadError, data } = await supabase.storage
