@@ -18,8 +18,7 @@ interface ToolRequestsProps {
 export const ToolRequests = ({ 
   requests, 
   onApprove, 
-  onReject, 
-  onMarkReturned,
+  onReject,
   toolName 
 }: ToolRequestsProps) => {
   return (
@@ -36,7 +35,6 @@ export const ToolRequests = ({
             avatarUrl={request.profiles?.avatar_url}
             onApprove={() => onApprove(request.id)}
             onReject={() => onReject(request.id)}
-            onMarkReturned={() => onMarkReturned(request.id)}
           />
         ))}
       </div>

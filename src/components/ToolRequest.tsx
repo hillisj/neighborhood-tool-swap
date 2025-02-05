@@ -12,7 +12,6 @@ interface ToolRequestProps {
   avatarUrl?: string;
   onApprove?: () => void;
   onReject?: () => void;
-  onMarkReturned?: () => void;
 }
 
 export const ToolRequest = ({
@@ -22,7 +21,6 @@ export const ToolRequest = ({
   avatarUrl,
   onApprove,
   onReject,
-  onMarkReturned,
 }: ToolRequestProps) => {
   return (
     <Card className="p-4">
@@ -64,17 +62,6 @@ export const ToolRequest = ({
             Reject
           </Button>
         </div>
-      )}
-      
-      {status === "approved" && onMarkReturned && (
-        <Button
-          onClick={onMarkReturned}
-          className="mt-4"
-          variant="secondary"
-          size="sm"
-        >
-          Mark as Returned
-        </Button>
       )}
     </Card>
   );
