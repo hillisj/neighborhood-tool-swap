@@ -32,7 +32,9 @@ export const ToolCard = ({
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const handleRequestCheckout = async () => {
+  const handleRequestCheckout = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation when clicking the request button
+    
     if (requiresAuth) {
       toast.error("Please sign in to request tools");
       navigate('/auth');
@@ -84,8 +86,12 @@ export const ToolCard = ({
     }
   };
 
+  const handleCardClick = () => {
+    navigate(`/tool/${id}`);
+  };
+
   return (
-    <Card className="overflow-hidden animate-fadeIn">
+    <Card className="overflow-hidden animate-fadeIn cursor-pointer hover:shadow-md transition-shadow" onClick={handleCardClick}>
       <div className="aspect-video relative overflow-hidden bg-gray-100">
         <img
           src={imageUrl}

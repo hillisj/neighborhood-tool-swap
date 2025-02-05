@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import AddTool from "./pages/AddTool";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
+import ToolDetail from "./pages/ToolDetail";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/" element={<Index />} />
+          <Route path="/tool/:id" element={<ToolDetail />} />
           <Route
             path="/add"
             element={

@@ -86,33 +86,48 @@ export type Database = {
       }
       tools: {
         Row: {
+          brand: string | null
+          condition: string | null
           created_at: string | null
           description: string | null
           id: string
           image_url: string | null
           is_available: boolean | null
+          maintenance_notes: string | null
+          model: string | null
           name: string
           owner_id: string
+          purchase_date: string | null
           updated_at: string | null
         }
         Insert: {
+          brand?: string | null
+          condition?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           is_available?: boolean | null
+          maintenance_notes?: string | null
+          model?: string | null
           name: string
           owner_id: string
+          purchase_date?: string | null
           updated_at?: string | null
         }
         Update: {
+          brand?: string | null
+          condition?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           is_available?: boolean | null
+          maintenance_notes?: string | null
+          model?: string | null
           name?: string
           owner_id?: string
+          purchase_date?: string | null
           updated_at?: string | null
         }
         Relationships: [
