@@ -68,32 +68,19 @@ export const ToolCard = ({
         return;
       }
 
-      // Check for any existing request for this tool/user combination
-      const { data: existingRequest } = await supabase
+      // Check only for active requests (pending or approved)
+      const { data: activeRequest } = await supabase
         .from('tool_requests')
         .select('status')
         .eq('tool_id', id)
         .eq('requester_id', user.id)
+        .in('status', ['pending', 'approved'])
         .maybeSingle();
 
-      if (existingRequest) {
-        let message = "";
-        switch (existingRequest.status) {
-          case 'pending':
-            message = "You already have a pending request for this tool";
-            break;
-          case 'approved':
-            message = "You currently have this tool checked out";
-            break;
-          case 'rejected':
-            message = "Your previous request was rejected. Please contact the owner";
-            break;
-          case 'returned':
-            message = "You have previously borrowed this tool. Please submit a new request";
-            break;
-          default:
-            message = "You cannot request this tool at this time";
-        }
+      if (activeRequest) {
+        const message = activeRequest.status === 'pending'
+          ? "You already have a pending request for this tool"
+          : "You currently have this tool checked out";
         toast.error(message);
         return;
       }
