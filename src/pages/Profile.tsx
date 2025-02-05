@@ -17,14 +17,8 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("owned");
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast.success("Logged out successfully");
-      navigate("/");
-    } catch (error) {
-      toast.error("Error logging out");
-    }
+  const handleProfileClick = () => {
+    navigate('/user-profile');
   };
 
   return (
@@ -32,7 +26,7 @@ const Profile = () => {
       <header className="bg-white shadow-sm py-4 px-4 sticky top-0 z-10">
         <div className="flex items-center justify-between max-w-md mx-auto">
           <h1 className="text-xl font-semibold">Your Tools</h1>
-          <Button variant="ghost" size="icon" onClick={handleLogout}>
+          <Button variant="ghost" size="icon" onClick={handleProfileClick}>
             <User className="h-5 w-5" />
           </Button>
         </div>
