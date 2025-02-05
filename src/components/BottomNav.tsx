@@ -1,4 +1,3 @@
-
 import { Grid, Plus, User } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -37,7 +36,7 @@ export const BottomNav = ({ authRequired }: BottomNavProps) => {
           }`}
         >
           <Grid size={24} />
-          <span className="text-xs">Tools</span>
+          <span className="text-xs">Library</span>
         </Link>
         <button
           onClick={() => handleProtectedNavigation('/add')}
