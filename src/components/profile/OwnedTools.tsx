@@ -1,0 +1,56 @@
+
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { ToolCard } from "@/components/ToolCard";
+
+export const OwnedTools = () => {
+  const { data: ownedTools, isLoading: loadingOwned } = useQuery({
+    queryKey: ['owned-tools'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from('tools')
+        .select(`
+          *,
+          profiles:owner_id (
+            username,
+            email
+          )
+        `)
+        .eq('owner_id', user.id);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  if (loadingOwned) {
+    return <div className="text-center text-gray-500">Loading your tools...</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-medium">Your Tools</h2>
+      <div className="grid gap-4">
+        {ownedTools?.map((tool) => (
+          <ToolCard
+            key={tool.id}
+            id={tool.id}
+            name={tool.name}
+            description={tool.description}
+            imageUrl={tool.image_url || "/placeholder.svg"}
+            owner={tool.profiles?.username || tool.profiles?.email?.split('@')[0] || 'Anonymous'}
+            isAvailable={tool.is_available}
+          />
+        ))}
+        {ownedTools?.length === 0 && (
+          <p className="text-center text-gray-500">
+            You haven't added any tools yet.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
