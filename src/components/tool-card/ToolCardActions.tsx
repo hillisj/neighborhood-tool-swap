@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Wrench } from "lucide-react";
 
 interface ToolCardActionsProps {
   isOwner: boolean;
@@ -31,7 +32,8 @@ export const ToolCardActions = ({
         }}
         className="bg-accent hover:bg-accent/90"
       >
-        Manage Tool
+        <Wrench className="mr-2 h-4 w-4" />
+        Manage
       </Button>
     );
   }

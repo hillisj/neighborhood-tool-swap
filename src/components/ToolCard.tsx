@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +30,29 @@ export const ToolCard = ({
   const [isOwner, setIsOwner] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkOwnership = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username, email')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          const ownerUsername = owner.split('@')[0]; // Handle email case
+          setIsOwner(
+            profile.username === owner || 
+            profile.email?.split('@')[0] === ownerUsername
+          );
+        }
+      }
+    };
+    
+    checkOwnership();
+  }, [owner]);
 
   const handleRequestCheckout = async (e: React.MouseEvent) => {
     e.stopPropagation();
