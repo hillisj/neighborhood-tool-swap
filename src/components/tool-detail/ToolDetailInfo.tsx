@@ -9,10 +9,14 @@ interface ToolDetailInfoProps {
       email: string | null;
     } | null;
   };
+  hasPendingRequests?: boolean;
 }
 
-export const ToolDetailInfo = ({ tool }: ToolDetailInfoProps) => {
-  const getStatusBadge = (status: 'available' | 'requested' | 'checked_out') => {
+export const ToolDetailInfo = ({ tool, hasPendingRequests }: ToolDetailInfoProps) => {
+  const getStatusBadge = (status: 'available' | 'requested' | 'checked_out', hasPending: boolean) => {
+    // Override status to 'requested' if there are pending requests
+    const displayStatus = hasPending ? 'requested' : status;
+    
     const styles = {
       available: "bg-green-100 text-green-800",
       requested: "bg-yellow-100 text-yellow-800",
@@ -26,8 +30,8 @@ export const ToolDetailInfo = ({ tool }: ToolDetailInfoProps) => {
     };
 
     return (
-      <Badge className={styles[status]}>
-        {labels[status]}
+      <Badge className={styles[displayStatus]}>
+        {labels[displayStatus]}
       </Badge>
     );
   };
@@ -36,7 +40,7 @@ export const ToolDetailInfo = ({ tool }: ToolDetailInfoProps) => {
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-gray-900">{tool.name}</h1>
-        {getStatusBadge(tool.status)}
+        {getStatusBadge(tool.status, hasPendingRequests || false)}
       </div>
 
       <p className="text-gray-600 mb-6">{tool.description}</p>

@@ -66,7 +66,7 @@ const ToolDetail = () => {
     enabled: !!id && tool?.status === 'checked_out',
   });
 
-  const { data: requests, isLoading: loadingRequests } = useQuery({
+  const { data: requests = [], isLoading: loadingRequests } = useQuery({
     queryKey: ['tool-requests', id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -86,6 +86,9 @@ const ToolDetail = () => {
       return data;
     },
   });
+
+  // Check if there are any pending requests
+  const hasPendingRequests = requests.some(request => request.status === 'pending');
 
   const handleMarkReturned = async () => {
     if (!activeCheckout) return;
@@ -176,7 +179,7 @@ const ToolDetail = () => {
             className="w-full h-64 object-cover"
           />
           
-          <ToolDetailInfo tool={tool} />
+          <ToolDetailInfo tool={tool} hasPendingRequests={hasPendingRequests} />
 
           {isOwner && tool.status === 'checked_out' && activeCheckout && (
             <div className="p-6 border-t">
