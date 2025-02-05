@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -7,12 +6,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { ToolRequest } from "@/components/ToolRequest";
+import { toast } from "sonner";
 
 const ToolDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { data: tool, isLoading } = useQuery({
+  const { data: tool, isLoading: loadingTool } = useQuery({
     queryKey: ['tool', id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -32,7 +33,77 @@ const ToolDetail = () => {
     },
   });
 
-  if (isLoading) {
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+  });
+
+  const { data: requests, isLoading: loadingRequests } = useQuery({
+    queryKey: ['tool-requests', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tool_requests')
+        .select(`
+          *,
+          profiles:requester_id (
+            username,
+            email
+          )
+        `)
+        .eq('tool_id', id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const handleApproveRequest = async (requestId: string) => {
+    const { error } = await supabase
+      .from('tool_requests')
+      .update({ status: 'approved' })
+      .eq('id', requestId);
+
+    if (error) {
+      toast.error("Failed to approve request");
+      return;
+    }
+    
+    toast.success("Request approved successfully");
+  };
+
+  const handleRejectRequest = async (requestId: string) => {
+    const { error } = await supabase
+      .from('tool_requests')
+      .update({ status: 'rejected' })
+      .eq('id', requestId);
+
+    if (error) {
+      toast.error("Failed to reject request");
+      return;
+    }
+    
+    toast.success("Request rejected successfully");
+  };
+
+  const handleMarkReturned = async (requestId: string) => {
+    const { error } = await supabase
+      .from('tool_requests')
+      .update({ status: 'returned' })
+      .eq('id', requestId);
+
+    if (error) {
+      toast.error("Failed to mark tool as returned");
+      return;
+    }
+    
+    toast.success("Tool marked as returned successfully");
+  };
+
+  if (loadingTool) {
     return (
       <div className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-2xl mx-auto">
@@ -78,6 +149,8 @@ const ToolDetail = () => {
       </Badge>
     );
   };
+
+  const isOwner = currentUser?.id === tool.owner_id;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -151,6 +224,26 @@ const ToolDetail = () => {
                 </p>
               </div>
             </div>
+
+            {isOwner && requests && requests.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-lg font-semibold mb-4">Tool Requests</h2>
+                <div className="space-y-4">
+                  {requests.map((request) => (
+                    <ToolRequest
+                      key={request.id}
+                      toolName={tool.name}
+                      requesterName={request.profiles?.username || request.profiles?.email?.split('@')[0] || 'Anonymous'}
+                      status={request.status}
+                      dueDate={request.due_date}
+                      onApprove={() => handleApproveRequest(request.id)}
+                      onReject={() => handleRejectRequest(request.id)}
+                      onMarkReturned={() => handleMarkReturned(request.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
