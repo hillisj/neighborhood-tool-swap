@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface ToolCardProps {
   id: string;
@@ -14,6 +15,7 @@ interface ToolCardProps {
   imageUrl: string;
   owner: string;
   isAvailable: boolean;
+  requiresAuth?: boolean;
 }
 
 export const ToolCard = ({
@@ -23,12 +25,20 @@ export const ToolCard = ({
   imageUrl,
   owner,
   isAvailable,
+  requiresAuth,
 }: ToolCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const handleRequestCheckout = async () => {
+    if (requiresAuth) {
+      toast.error("Please sign in to request tools");
+      navigate('/auth');
+      return;
+    }
+
     try {
       setIsRequesting(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -93,7 +103,7 @@ export const ToolCard = ({
               disabled={isRequesting}
               className="bg-accent hover:bg-accent/90"
             >
-              {isRequesting ? "Requesting..." : "Request"}
+              {isRequesting ? "Requesting..." : requiresAuth ? "Sign in to Request" : "Request"}
             </Button>
           )}
         </div>
