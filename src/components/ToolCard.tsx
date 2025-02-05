@@ -52,6 +52,11 @@ export const ToolCard = ({
     checkToolStatus();
   }, [id]);
 
+  // Update local status when prop changes
+  useEffect(() => {
+    setToolStatus(initialStatus);
+  }, [initialStatus]);
+
   const handleRequestCheckout = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
@@ -71,7 +76,6 @@ export const ToolCard = ({
         return;
       }
 
-      // Check only for active requests (pending or approved)
       const { data: activeRequest } = await supabase
         .from('tool_requests')
         .select('status')
