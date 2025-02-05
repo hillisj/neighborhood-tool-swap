@@ -60,7 +60,6 @@ const Index = () => {
                 imageUrl={tool.image_url || "/placeholder.svg"}
                 owner={tool.profiles?.username || tool.profiles?.email?.split('@')[0] || 'Anonymous'}
                 isAvailable={tool.is_available}
-                onRequestCheckout={() => console.log(`Requesting checkout for tool ${tool.id}`)}
               />
             ))}
             {tools?.length === 0 && (

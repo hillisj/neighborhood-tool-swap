@@ -8,9 +8,9 @@ interface RequestStatusProps {
 }
 
 export const RequestStatus = ({ status }: RequestStatusProps) => {
-  const variants: Record<RequestStatus, "default" | "success" | "destructive" | "secondary"> = {
+  const variants: Record<RequestStatus, "default" | "secondary" | "destructive" | "outline"> = {
     pending: "default",
-    approved: "success",
+    approved: "outline", // Changed from 'success' to 'outline'
     rejected: "destructive",
     returned: "secondary",
   };
