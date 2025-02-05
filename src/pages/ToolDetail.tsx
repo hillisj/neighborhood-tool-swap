@@ -10,6 +10,18 @@ import { ToolRequests } from "@/components/tool-detail/ToolRequests";
 import { BottomNav } from "@/components/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const ToolDetail = () => {
   const { id } = useParams();
@@ -156,6 +168,21 @@ const ToolDetail = () => {
     toast.success("Request rejected successfully");
   };
 
+  const handleDeleteTool = async () => {
+    const { error } = await supabase
+      .from('tools')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      toast.error("Failed to delete tool");
+      return;
+    }
+    
+    toast.success("Tool deleted successfully");
+    navigate('/profile');
+  };
+
   if (loadingTool) {
     return (
       <>
@@ -192,6 +219,35 @@ const ToolDetail = () => {
             alt={tool.name}
             className="w-full h-64 object-cover"
           />
+          
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-2xl font-bold text-gray-900">{tool.name}</h1>
+              {isOwner && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="icon">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Tool</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this tool? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteTool}>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
+          </div>
           
           <ToolDetailInfo tool={tool} hasPendingRequests={hasPendingRequests} />
 
