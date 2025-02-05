@@ -23,7 +23,7 @@ export const ToolRequests = ({
   toolName 
 }: ToolRequestsProps) => {
   return (
-    <div className="mt-8">
+    <div className="p-6 border-t">
       <h2 className="text-lg font-semibold mb-4">Tool Requests</h2>
       <div className="space-y-4">
         {requests.map((request) => (
