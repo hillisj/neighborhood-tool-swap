@@ -115,14 +115,17 @@ export const ToolCard = ({
           }`}
           onLoad={() => setImageLoaded(true)}
         />
-      </div>
-      <div className="p-4">
-        <div className="flex items-start justify-between">
-          <h3 className="font-semibold text-lg">{name}</h3>
-          <Badge variant={isAvailable ? "default" : "secondary"}>
+        <div className="absolute top-2 right-2">
+          <Badge 
+            variant={isAvailable ? "default" : "secondary"}
+            className={isAvailable ? "bg-emerald-500 hover:bg-emerald-600" : ""}
+          >
             {isAvailable ? "Available" : "Checked Out"}
           </Badge>
         </div>
+      </div>
+      <div className="p-4">
+        <h3 className="font-semibold text-lg">{name}</h3>
         <p className="text-sm text-gray-600 mt-2">{description}</p>
         <div className="mt-4 flex items-center justify-between">
           <p className="text-sm text-gray-500">Owner: {owner}</p>
