@@ -19,6 +19,7 @@ const UserProfile = () => {
   const [isUploading, setIsUploading] = useState(false);
   const { toast: toastNotification } = useToast();
   const navigate = useNavigate();
+  const fileInputRef = useState<HTMLInputElement | null>(null);
 
   const { data: profile, refetch } = useQuery({
     queryKey: ['user-profile'],
@@ -86,10 +87,21 @@ const UserProfile = () => {
     }
   };
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleAvatarClick = () => {
+    // Create a hidden file input and trigger it
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const target = e.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        handleAvatarUpload(target.files[0]);
+      }
+    };
+    input.click();
+  };
 
+  const handleAvatarUpload = async (file: File) => {
     try {
       setIsUploading(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -166,7 +178,10 @@ const UserProfile = () => {
 
       <main className="container max-w-md mx-auto px-4 py-6 space-y-6">
         <div className="flex flex-col items-center space-y-4">
-          <div className="relative group cursor-pointer">
+          <div 
+            className="relative group cursor-pointer"
+            onClick={handleAvatarClick}
+          >
             <Avatar className="w-24 h-24">
               <AvatarImage
                 src={avatarUrl}
@@ -177,13 +192,6 @@ const UserProfile = () => {
                 <User className="w-12 h-12 text-gray-400" />
               </AvatarFallback>
             </Avatar>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarUpload}
-              disabled={isUploading}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-full flex items-center justify-center">
               <span className="text-white opacity-0 group-hover:opacity-100 text-sm">
                 {isUploading ? "Uploading..." : "Change"}
