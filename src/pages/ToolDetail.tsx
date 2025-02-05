@@ -8,6 +8,8 @@ import { ToolDetailSkeleton } from "@/components/tool-detail/ToolDetailSkeleton"
 import { ToolDetailInfo } from "@/components/tool-detail/ToolDetailInfo";
 import { ToolRequests } from "@/components/tool-detail/ToolRequests";
 import { BottomNav } from "@/components/BottomNav";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const ToolDetail = () => {
   const { id } = useParams();
@@ -41,6 +43,29 @@ const ToolDetail = () => {
     },
   });
 
+  const { data: activeCheckout } = useQuery({
+    queryKey: ['active-checkout', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tool_requests')
+        .select(`
+          *,
+          profiles:requester_id (
+            username,
+            email,
+            avatar_url
+          )
+        `)
+        .eq('tool_id', id)
+        .eq('status', 'approved')
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id && tool?.status === 'checked_out',
+  });
+
   const { data: requests, isLoading: loadingRequests } = useQuery({
     queryKey: ['tool-requests', id],
     queryFn: async () => {
@@ -61,6 +86,25 @@ const ToolDetail = () => {
       return data;
     },
   });
+
+  const handleMarkReturned = async () => {
+    if (!activeCheckout) return;
+    
+    const { error } = await supabase
+      .from('tool_requests')
+      .update({ 
+        status: 'returned',
+        return_date: new Date().toISOString()
+      })
+      .eq('id', activeCheckout.id);
+
+    if (error) {
+      toast.error("Failed to mark tool as returned");
+      return;
+    }
+    
+    toast.success("Tool marked as returned successfully");
+  };
 
   const handleApproveRequest = async (requestId: string) => {
     const dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -93,25 +137,6 @@ const ToolDetail = () => {
     }
     
     toast.success("Request rejected successfully");
-  };
-
-  const handleMarkReturned = async (requestId: string) => {
-    const returnDate = new Date().toISOString();
-    
-    const { error } = await supabase
-      .from('tool_requests')
-      .update({ 
-        status: 'returned',
-        return_date: returnDate
-      })
-      .eq('id', requestId);
-
-    if (error) {
-      toast.error("Failed to mark tool as returned");
-      return;
-    }
-    
-    toast.success("Tool marked as returned successfully");
   };
 
   if (loadingTool) {
@@ -152,6 +177,45 @@ const ToolDetail = () => {
           />
           
           <ToolDetailInfo tool={tool} />
+
+          {isOwner && tool.status === 'checked_out' && activeCheckout && (
+            <div className="p-6 border-t">
+              <h2 className="text-lg font-semibold mb-4">Currently Checked Out</h2>
+              <Card className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarImage src={activeCheckout.profiles?.avatar_url || undefined} />
+                      <AvatarFallback>
+                        {activeCheckout.profiles?.username?.[0]?.toUpperCase() || 
+                         activeCheckout.profiles?.email?.[0]?.toUpperCase() || 
+                         'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">
+                        {activeCheckout.profiles?.username || 
+                         activeCheckout.profiles?.email?.split('@')[0] || 
+                         'Anonymous'}
+                      </p>
+                      {activeCheckout.due_date && (
+                        <p className="text-sm text-gray-500">
+                          Due: {new Date(activeCheckout.due_date).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleMarkReturned}
+                    variant="secondary"
+                    size="sm"
+                  >
+                    Mark as Returned
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          )}
 
           {isOwner && requests && requests.length > 0 && (
             <ToolRequests
