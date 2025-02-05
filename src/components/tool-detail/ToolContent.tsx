@@ -76,7 +76,11 @@ export const ToolContent = ({
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
       <ToolImage imageUrl={tool.image_url} name={tool.name} />
       
-      <ToolDetailInfo tool={tool} hasPendingRequests={hasPendingRequests} />
+      <ToolDetailInfo 
+        tool={tool} 
+        hasPendingRequests={hasPendingRequests}
+        isOwner={isOwner}
+      />
 
       {showRequestButton && (
         <RequestToolButton

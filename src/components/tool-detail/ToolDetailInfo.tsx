@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Tables } from "@/integrations/supabase/types";
+import { EditToolDialog } from "./EditToolDialog";
 
 interface ToolDetailInfoProps {
   tool: Tables<"tools"> & {
@@ -10,9 +11,10 @@ interface ToolDetailInfoProps {
     } | null;
   };
   hasPendingRequests?: boolean;
+  isOwner?: boolean;
 }
 
-export const ToolDetailInfo = ({ tool, hasPendingRequests }: ToolDetailInfoProps) => {
+export const ToolDetailInfo = ({ tool, hasPendingRequests, isOwner }: ToolDetailInfoProps) => {
   const getStatusBadge = (status: 'available' | 'requested' | 'checked_out', hasPending: boolean) => {
     // Override status to 'requested' if there are pending requests
     const displayStatus = hasPending ? 'requested' : status;
@@ -39,7 +41,10 @@ export const ToolDetailInfo = ({ tool, hasPendingRequests }: ToolDetailInfoProps
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-gray-900">{tool.name}</h1>
+        <div className="flex items-center space-x-4">
+          <h1 className="text-2xl font-bold text-gray-900">{tool.name}</h1>
+          {isOwner && <EditToolDialog tool={tool} />}
+        </div>
         {getStatusBadge(tool.status, hasPendingRequests || false)}
       </div>
 
