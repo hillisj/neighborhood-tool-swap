@@ -68,6 +68,20 @@ export const ToolCard = ({
         return;
       }
 
+      // First check if there's an existing pending request
+      const { data: existingRequests } = await supabase
+        .from('tool_requests')
+        .select('*')
+        .eq('tool_id', id)
+        .eq('requester_id', user.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (existingRequests) {
+        toast.error("You already have a pending request for this tool");
+        return;
+      }
+
       const { error } = await supabase
         .from('tool_requests')
         .insert({
@@ -77,9 +91,7 @@ export const ToolCard = ({
         });
 
       if (error) {
-        if (error.code === '23505') {
-          toast.error("You already have a pending request for this tool");
-        } else if (error.message.includes('violates row-level security')) {
+        if (error.message.includes('violates row-level security')) {
           toast.error("You cannot request your own tools");
         } else {
           throw error;
