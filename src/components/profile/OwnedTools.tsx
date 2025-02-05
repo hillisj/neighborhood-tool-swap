@@ -32,9 +32,9 @@ export const OwnedTools = () => {
           request.status === 'pending' || request.status === 'approved'
         )
           ? tool.tool_requests.some(request => request.status === 'approved')
-            ? 'checked_out'
-            : 'requested'
-          : 'available'
+            ? 'checked_out' as const
+            : 'requested' as const
+          : 'available' as const
       }));
     },
   });
