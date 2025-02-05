@@ -2,10 +2,11 @@ import { ToolCard } from "@/components/ToolCard";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { UserCircle2 } from "lucide-react";
+import { User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const fetchTools = async () => {
   const { data, error } = await supabase
@@ -51,7 +52,7 @@ const Index = () => {
     queryFn: fetchTools,
   });
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [userProfile, setUserProfile] = useState<{ username?: string | null, email?: string | null } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ username?: string | null, email?: string | null, avatar_url?: string | null } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,7 +80,7 @@ const Index = () => {
   const fetchUserProfile = async (userId: string) => {
     const { data, error } = await supabase
       .from('profiles')
-      .select('username, email')
+      .select('username, email, avatar_url')
       .eq('id', userId)
       .single();
     
@@ -98,7 +99,16 @@ const Index = () => {
               <span className="text-sm">
                 {userProfile?.username || userProfile?.email?.split('@')[0] || 'Profile'}
               </span>
-              <UserCircle2 size={24} />
+              <Avatar className="h-8 w-8">
+                <AvatarImage
+                  src={userProfile?.avatar_url || ''}
+                  alt="Profile"
+                  className="object-cover"
+                />
+                <AvatarFallback>
+                  <User className="h-4 w-4 text-gray-400" />
+                </AvatarFallback>
+              </Avatar>
             </Link>
           ) : (
             <Button
@@ -149,4 +159,3 @@ const Index = () => {
 };
 
 export default Index;
-
