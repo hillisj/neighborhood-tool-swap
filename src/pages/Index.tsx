@@ -1,4 +1,3 @@
-
 import { ToolCard } from "@/components/ToolCard";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,21 +29,42 @@ const Index = () => {
     queryFn: fetchTools,
   });
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [userProfile, setUserProfile] = useState<{ username?: string | null, email?: string | null } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsAuthenticated(!!session);
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      }
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      } else {
+        setUserProfile(null);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchUserProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('username, email')
+      .eq('id', userId)
+      .single();
+    
+    if (!error && data) {
+      setUserProfile(data);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -52,7 +72,10 @@ const Index = () => {
         <div className="flex items-center justify-between max-w-md mx-auto">
           <h1 className="text-xl font-semibold">Tool Library</h1>
           {isAuthenticated ? (
-            <Link to="/user-profile" className="text-gray-600 hover:text-gray-900">
+            <Link to="/user-profile" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+              <span className="text-sm">
+                {userProfile?.username || userProfile?.email?.split('@')[0] || 'Profile'}
+              </span>
               <UserCircle2 size={24} />
             </Link>
           ) : (
