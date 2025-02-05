@@ -17,7 +17,7 @@ export const OwnedTools = () => {
             username,
             email
           ),
-          tool_requests (
+          tool_requests!inner (
             status
           )
         `)
@@ -26,11 +26,15 @@ export const OwnedTools = () => {
       if (toolsError) throw toolsError;
       
       // Process the data to include pending requests information
-      return tools.map(tool => ({
+      return tools?.map(tool => ({
         ...tool,
-        status: tool.tool_requests?.some(request => request.status === 'pending')
-          ? 'requested'
-          : tool.status
+        status: tool.tool_requests?.some(request => 
+          request.status === 'pending' || request.status === 'approved'
+        )
+          ? tool.tool_requests.some(request => request.status === 'approved')
+            ? 'checked_out'
+            : 'requested'
+          : 'available'
       }));
     },
   });
