@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { BottomNav } from "@/components/BottomNav";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -59,51 +60,55 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md p-6">
-        <h1 className="text-2xl font-semibold text-center mb-6">
-          {isLogin ? "Welcome Back" : "Create an Account"}
-        </h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+    <div className="min-h-screen bg-gray-50">
+      <div className="p-4 pb-20">
+        <Card className="w-full max-w-md p-6 mx-auto mt-8">
+          <h1 className="text-2xl font-semibold text-center mb-6">
+            {isLogin ? "Welcome Back" : "Create an Account"}
+          </h1>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full"
+              />
+            </div>
+            <div>
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full"
+                minLength={6}
+              />
+            </div>
+            <Button
+              type="submit"
               className="w-full"
-            />
-          </div>
-          <div>
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full"
-              minLength={6}
-            />
-          </div>
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-          >
-            {loading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
-          </Button>
-        </form>
-        <p className="text-center mt-4 text-sm text-gray-600">
-          {isLogin ? "Don't have an account?" : "Already have an account?"}
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="ml-1 text-accent hover:underline"
-          >
-            {isLogin ? "Sign Up" : "Sign In"}
-          </button>
-        </p>
-      </Card>
+              disabled={loading}
+            >
+              {loading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
+            </Button>
+          </form>
+          <p className="text-center mt-4 text-sm text-gray-600">
+            {isLogin ? "Don't have an account?" : "Already have an account?"}
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              className="ml-1 text-accent hover:underline"
+            >
+              {isLogin ? "Sign Up" : "Sign In"}
+            </button>
+          </p>
+        </Card>
+      </div>
+      <BottomNav />
     </div>
   );
-}
+};
+
