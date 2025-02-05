@@ -43,8 +43,8 @@ export const ToolCard = ({
         .eq('id', id)
         .maybeSingle();
       
-      setIsOwner(tool?.owner_id === user.id);
-      if (tool?.status) {
+      if (tool) {
+        setIsOwner(tool.owner_id === user.id);
         setToolStatus(tool.status);
       }
     };
