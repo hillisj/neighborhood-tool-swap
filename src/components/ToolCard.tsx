@@ -1,12 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { ToolImage } from "./tool-card/ToolImage";
+import { ToolCardActions } from "./tool-card/ToolCardActions";
 
 interface ToolCardProps {
   id: string;
@@ -18,8 +17,6 @@ interface ToolCardProps {
   requiresAuth?: boolean;
 }
 
-type ToolStatus = "available" | "requested" | "checked_out";
-
 export const ToolCard = ({
   id,
   name,
@@ -29,9 +26,8 @@ export const ToolCard = ({
   status,
   requiresAuth,
 }: ToolCardProps) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
-  const [toolStatus, setToolStatus] = useState<ToolStatus>(status);
+  const [toolStatus, setToolStatus] = useState(status);
   const [isOwner, setIsOwner] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -41,7 +37,6 @@ export const ToolCard = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Check if current user is the owner
       const { data: tool } = await supabase
         .from('tools')
         .select('owner_id')
@@ -53,17 +48,6 @@ export const ToolCard = ({
 
     checkToolStatus();
   }, [id]);
-
-  const getStatusBadge = (status: ToolStatus) => {
-    switch (status) {
-      case "available":
-        return <Badge className="bg-emerald-500 hover:bg-emerald-600">Available</Badge>;
-      case "requested":
-        return <Badge variant="secondary" className="bg-yellow-500 hover:bg-yellow-600 text-white">Requested</Badge>;
-      case "checked_out":
-        return <Badge variant="secondary">Checked Out</Badge>;
-    }
-  };
 
   const handleRequestCheckout = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -117,54 +101,28 @@ export const ToolCard = ({
   };
 
   return (
-    <Card className="overflow-hidden animate-fadeIn cursor-pointer hover:shadow-md transition-shadow" onClick={handleCardClick}>
-      <div className="aspect-video relative overflow-hidden bg-gray-100">
-        <img
-          src={imageUrl}
-          alt={name}
-          className={`object-cover w-full h-full transition-opacity duration-300 ${
-            imageLoaded ? "opacity-100" : "opacity-0"
-          }`}
-          onLoad={() => setImageLoaded(true)}
-        />
-        <div className="absolute top-2 right-2">
-          {getStatusBadge(toolStatus)}
-        </div>
-      </div>
+    <Card 
+      className="overflow-hidden animate-fadeIn cursor-pointer hover:shadow-md transition-shadow" 
+      onClick={handleCardClick}
+    >
+      <ToolImage
+        imageUrl={imageUrl}
+        name={name}
+        status={toolStatus}
+      />
       <div className="p-4">
         <h3 className="font-semibold text-lg">{name}</h3>
         <p className="text-sm text-gray-600 mt-2">{description}</p>
         <div className="mt-4 flex items-center justify-between">
           <p className="text-sm text-gray-500">Owner: {owner}</p>
-          {isOwner ? (
-            <Button
-              variant="default"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/tool/${id}`);
-              }}
-              className="bg-accent hover:bg-accent/90"
-            >
-              Manage Tool
-            </Button>
-          ) : (
-            toolStatus === "available" && (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleRequestCheckout}
-                disabled={isRequesting}
-                className="bg-accent hover:bg-accent/90"
-              >
-                {isRequesting 
-                  ? "Requesting..." 
-                  : requiresAuth 
-                    ? "Sign in to Request" 
-                    : "Request"}
-              </Button>
-            )
-          )}
+          <ToolCardActions
+            isOwner={isOwner}
+            toolId={id}
+            toolStatus={toolStatus}
+            isRequesting={isRequesting}
+            requiresAuth={requiresAuth}
+            onRequestCheckout={handleRequestCheckout}
+          />
         </div>
       </div>
     </Card>
