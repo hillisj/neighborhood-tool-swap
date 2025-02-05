@@ -77,7 +77,7 @@ export const CheckedOutTools = () => {
                 checkout.tool.profiles?.email?.split('@')[0] || 
                 'Anonymous'
               }
-              isAvailable={false}
+              status={checkout.tool.status}
             />
           ))}
           {checkedOutTools?.length === 0 && (
@@ -103,7 +103,7 @@ export const CheckedOutTools = () => {
                 request.tool.profiles?.email?.split('@')[0] || 
                 'Anonymous'
               }
-              isAvailable={false}
+              status={request.tool.status}
             />
           ))}
           {pendingTools?.length === 0 && (

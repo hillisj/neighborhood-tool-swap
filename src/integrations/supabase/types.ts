@@ -92,12 +92,12 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
-          is_available: boolean | null
           maintenance_notes: string | null
           model: string | null
           name: string
           owner_id: string
           purchase_date: string | null
+          status: Database["public"]["Enums"]["tool_status"]
           updated_at: string | null
         }
         Insert: {
@@ -107,12 +107,12 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
-          is_available?: boolean | null
           maintenance_notes?: string | null
           model?: string | null
           name: string
           owner_id: string
           purchase_date?: string | null
+          status?: Database["public"]["Enums"]["tool_status"]
           updated_at?: string | null
         }
         Update: {
@@ -122,12 +122,12 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
-          is_available?: boolean | null
           maintenance_notes?: string | null
           model?: string | null
           name?: string
           owner_id?: string
           purchase_date?: string | null
+          status?: Database["public"]["Enums"]["tool_status"]
           updated_at?: string | null
         }
         Relationships: [
@@ -149,6 +149,7 @@ export type Database = {
     }
     Enums: {
       request_status: "pending" | "approved" | "rejected" | "returned"
+      tool_status: "available" | "requested" | "checked_out"
     }
     CompositeTypes: {
       [_ in never]: never

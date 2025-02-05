@@ -10,7 +10,6 @@ export const OwnedTools = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // First, get all owned tools
       const { data: tools, error: toolsError } = await supabase
         .from('tools')
         .select(`
@@ -18,25 +17,12 @@ export const OwnedTools = () => {
           profiles:owner_id (
             username,
             email
-          ),
-          tool_requests (
-            status
           )
         `)
         .eq('owner_id', user.id);
 
       if (toolsError) throw toolsError;
-
-      // Process tools to determine their true availability status
-      return tools.map(tool => {
-        const hasPendingRequest = tool.tool_requests?.some(request => request.status === 'pending');
-        const hasApprovedRequest = tool.tool_requests?.some(request => request.status === 'approved');
-        
-        return {
-          ...tool,
-          is_available: !hasPendingRequest && !hasApprovedRequest && tool.is_available
-        };
-      });
+      return tools;
     },
   });
 
@@ -56,7 +42,7 @@ export const OwnedTools = () => {
             description={tool.description}
             imageUrl={tool.image_url || "/placeholder.svg"}
             owner={tool.profiles?.username || tool.profiles?.email?.split('@')[0] || 'Anonymous'}
-            isAvailable={tool.is_available}
+            status={tool.status}
           />
         ))}
         {ownedTools?.length === 0 && (

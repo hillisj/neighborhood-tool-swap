@@ -86,7 +86,7 @@ const Index = () => {
                 description={tool.description}
                 imageUrl={tool.image_url || "/placeholder.svg"}
                 owner={tool.profiles?.username || tool.profiles?.email?.split('@')[0] || 'Anonymous'}
-                isAvailable={tool.is_available}
+                status={tool.status}
                 requiresAuth={!isAuthenticated}
               />
             ))}

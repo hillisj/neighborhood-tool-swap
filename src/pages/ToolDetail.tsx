@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 const ToolDetail = () => {
   const { id } = useParams();
@@ -58,6 +59,26 @@ const ToolDetail = () => {
     );
   }
 
+  const getStatusBadge = (status: 'available' | 'requested' | 'checked_out') => {
+    const styles = {
+      available: "bg-green-100 text-green-800",
+      requested: "bg-yellow-100 text-yellow-800",
+      checked_out: "bg-gray-100 text-gray-800"
+    };
+    
+    const labels = {
+      available: "Available",
+      requested: "Requested",
+      checked_out: "Checked Out"
+    };
+
+    return (
+      <Badge className={styles[status]}>
+        {labels[status]}
+      </Badge>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto p-4">
@@ -80,13 +101,7 @@ const ToolDetail = () => {
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-2xl font-bold text-gray-900">{tool.name}</h1>
-              <span className={`px-3 py-1 rounded-full text-sm ${
-                tool.is_available 
-                  ? "bg-green-100 text-green-800" 
-                  : "bg-gray-100 text-gray-800"
-              }`}>
-                {tool.is_available ? "Available" : "Checked Out"}
-              </span>
+              {getStatusBadge(tool.status)}
             </div>
 
             <p className="text-gray-600 mb-6">{tool.description}</p>

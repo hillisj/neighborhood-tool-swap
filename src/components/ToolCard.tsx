@@ -14,11 +14,11 @@ interface ToolCardProps {
   description: string;
   imageUrl: string;
   owner: string;
-  isAvailable: boolean;
+  status: 'available' | 'requested' | 'checked_out';
   requiresAuth?: boolean;
 }
 
-type ToolStatus = "available" | "requested" | "checked-out";
+type ToolStatus = "available" | "requested" | "checked_out";
 
 export const ToolCard = ({
   id,
@@ -26,12 +26,12 @@ export const ToolCard = ({
   description,
   imageUrl,
   owner,
-  isAvailable,
+  status,
   requiresAuth,
 }: ToolCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
-  const [toolStatus, setToolStatus] = useState<ToolStatus>(isAvailable ? "available" : "checked-out");
+  const [toolStatus, setToolStatus] = useState<ToolStatus>(status);
   const [isOwner, setIsOwner] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -49,31 +49,6 @@ export const ToolCard = ({
         .single();
       
       setIsOwner(tool?.owner_id === user.id);
-
-      // Check if there's a pending request by the current user
-      const { data: requests } = await supabase
-        .from('tool_requests')
-        .select()
-        .eq('tool_id', id)
-        .eq('requester_id', user.id)
-        .eq('status', 'pending')
-        .maybeSingle();
-
-      // Check if tool is checked out (has an approved request)
-      const { data: activeCheckout } = await supabase
-        .from('tool_requests')
-        .select()
-        .eq('tool_id', id)
-        .eq('status', 'approved')
-        .maybeSingle();
-
-      if (requests) {
-        setToolStatus("requested");
-      } else if (activeCheckout) {
-        setToolStatus("checked-out");
-      } else {
-        setToolStatus("available");
-      }
     };
 
     checkToolStatus();
@@ -85,7 +60,7 @@ export const ToolCard = ({
         return <Badge className="bg-emerald-500 hover:bg-emerald-600">Available</Badge>;
       case "requested":
         return <Badge variant="secondary" className="bg-yellow-500 hover:bg-yellow-600 text-white">Requested</Badge>;
-      case "checked-out":
+      case "checked_out":
         return <Badge variant="secondary">Checked Out</Badge>;
     }
   };
@@ -181,4 +156,3 @@ export const ToolCard = ({
     </Card>
   );
 };
-
