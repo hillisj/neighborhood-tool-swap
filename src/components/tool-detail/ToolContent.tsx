@@ -6,6 +6,8 @@ import { ToolImage } from "./ToolImage";
 import { useToolActions } from "@/hooks/useToolActions";
 import { RequestToolButton } from "./RequestToolButton";
 import { DangerZone } from "./DangerZone";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ToolContentProps {
   tool: Tables<"tools"> & {
@@ -48,9 +50,27 @@ export const ToolContent = ({
     handleDeleteTool,
   } = useToolActions(tool.id);
 
-  // Only show the request button if the user is not the owner,
-  // the tool is available, and there are no pending requests
-  const showRequestButton = !isOwner && tool.status === 'available' && !hasPendingRequests;
+  // Get the current user to check for their pending requests
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+  });
+
+  // Check if the current user has a pending request
+  const hasUserPendingRequest = currentUser && requests.some(
+    request => request.requester_id === currentUser.id && request.status === 'pending'
+  );
+
+  // Only show the request button if:
+  // 1. User is not the owner
+  // 2. Tool is available
+  // 3. User doesn't have a pending request
+  const showRequestButton = !isOwner && 
+    tool.status === 'available' && 
+    !hasUserPendingRequest;
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
