@@ -28,7 +28,7 @@ export const PendingRequests = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return { data, userId: user.id };
     },
   });
 
@@ -56,8 +56,8 @@ export const PendingRequests = () => {
   }
 
   // Filter requests for tools that the current user owns
-  const pendingRequests = toolRequests?.filter(request => {
-    return request.tool?.owner_id === supabase.auth.getSession()?.data?.session?.user?.id;
+  const pendingRequests = toolRequests?.data?.filter(request => {
+    return request.tool?.owner_id === toolRequests.userId;
   });
 
   return (
