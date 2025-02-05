@@ -1,24 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { RequestStatus } from "@/components/RequestStatus";
 import { format } from "date-fns";
 import { CheckCircle2, XCircle } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ToolRequestProps {
   toolName: string;
   requesterName: string;
   status: "pending" | "approved" | "rejected" | "returned";
   dueDate?: string;
+  avatarUrl?: string;
   onApprove?: () => void;
   onReject?: () => void;
   onMarkReturned?: () => void;
 }
 
 export const ToolRequest = ({
-  toolName,
   requesterName,
   status,
   dueDate,
+  avatarUrl,
   onApprove,
   onReject,
   onMarkReturned,
@@ -26,16 +27,20 @@ export const ToolRequest = ({
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between">
-        <div>
-          <h3 className="font-medium">{toolName}</h3>
-          <p className="text-sm text-gray-600">Requested by: {requesterName}</p>
-          {dueDate && (
-            <p className="text-sm text-gray-600">
-              Due: {format(new Date(dueDate), "MMM d, yyyy")}
-            </p>
-          )}
+        <div className="flex items-center gap-3">
+          <Avatar>
+            <AvatarImage src={avatarUrl} />
+            <AvatarFallback>{requesterName[0]?.toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm text-gray-600">Requested by: {requesterName}</p>
+            {dueDate && (
+              <p className="text-sm text-gray-600">
+                Due: {format(new Date(dueDate), "MMM d, yyyy")}
+              </p>
+            )}
+          </div>
         </div>
-        <RequestStatus status={status} />
       </div>
       
       {status === "pending" && (

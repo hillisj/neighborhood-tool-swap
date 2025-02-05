@@ -50,7 +50,8 @@ const ToolDetail = () => {
           *,
           profiles:requester_id (
             username,
-            email
+            email,
+            avatar_url
           )
         `)
         .eq('tool_id', id)
@@ -236,6 +237,7 @@ const ToolDetail = () => {
                       requesterName={request.profiles?.username || request.profiles?.email?.split('@')[0] || 'Anonymous'}
                       status={request.status}
                       dueDate={request.due_date}
+                      avatarUrl={request.profiles?.avatar_url}
                       onApprove={() => handleApproveRequest(request.id)}
                       onReject={() => handleRejectRequest(request.id)}
                       onMarkReturned={() => handleMarkReturned(request.id)}
