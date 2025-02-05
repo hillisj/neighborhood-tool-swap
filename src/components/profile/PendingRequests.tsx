@@ -24,6 +24,7 @@ export const PendingRequests = () => {
             email
           )
         `)
+        .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -54,10 +55,10 @@ export const PendingRequests = () => {
     return <div className="text-center text-gray-500">Loading requests...</div>;
   }
 
-  const pendingRequests = toolRequests?.filter(request => 
-    request.tool?.owner_id === (supabase.auth.getUser() as any).data?.user?.id &&
-    request.status === 'pending'
-  );
+  // Filter requests for tools that the current user owns
+  const pendingRequests = toolRequests?.filter(request => {
+    return request.tool?.owner_id === supabase.auth.getSession()?.data?.session?.user?.id;
+  });
 
   return (
     <div className="space-y-4 mt-8">
@@ -75,7 +76,7 @@ export const PendingRequests = () => {
             status={request.status}
             onApprove={() => {
               const dueDate = new Date();
-              dueDate.setDate(dueDate.getDate() + 7);
+              dueDate.setDate(dueDate.getDate() + 7); // Set due date to 7 days from now
               handleRequestAction(request.id, 'approved', dueDate.toISOString());
             }}
             onReject={() => handleRequestAction(request.id, 'rejected')}
