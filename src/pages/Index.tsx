@@ -9,6 +9,9 @@ import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const fetchTools = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  const currentUserId = user?.id;
+
   const { data, error } = await supabase
     .from('tools')
     .select(`
@@ -33,17 +36,22 @@ const fetchTools = async () => {
       : tool.status
   }));
 
-  // Sort tools by status in the specified order
+  // Sort tools by status and ownership
   const statusOrder = {
     'available': 0,
     'requested': 1,
     'checked_out': 2
   };
 
-  return processedTools.sort((a, b) => 
-    statusOrder[a.status as keyof typeof statusOrder] - 
-    statusOrder[b.status as keyof typeof statusOrder]
-  );
+  return processedTools.sort((a, b) => {
+    // First, sort by ownership (other users' tools first)
+    if (a.owner_id === currentUserId && b.owner_id !== currentUserId) return 1;
+    if (a.owner_id !== currentUserId && b.owner_id === currentUserId) return -1;
+    
+    // Then sort by status
+    return statusOrder[a.status as keyof typeof statusOrder] - 
+           statusOrder[b.status as keyof typeof statusOrder];
+  });
 };
 
 const Index = () => {
