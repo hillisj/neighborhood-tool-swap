@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { BottomNav } from "@/components/BottomNav";
 
 const UserProfile = () => {
   const [username, setUsername] = useState("");
@@ -104,7 +105,7 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-20">
       <header className="bg-white shadow-sm py-4 px-4 sticky top-0 z-10">
         <div className="flex items-center justify-between max-w-md mx-auto">
           <h1 className="text-xl font-semibold">Profile</h1>
@@ -168,6 +169,7 @@ const UserProfile = () => {
           </Button>
         )}
       </main>
+      <BottomNav />
     </div>
   );
 };
