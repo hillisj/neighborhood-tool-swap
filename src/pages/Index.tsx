@@ -17,11 +17,14 @@ const fetchTools = async () => {
         email
       )
     `)
+    .eq('status', 'available')
     .order('created_at', { ascending: false });
 
   if (error) throw error;
   return data;
 };
+
+// ... keep existing code (auth and profile management)
 
 const Index = () => {
   const { data: tools, isLoading } = useQuery({
@@ -115,7 +118,7 @@ const Index = () => {
             ))}
             {tools?.length === 0 && (
               <div className="text-center text-gray-500">
-                No tools available. {isAuthenticated ? 'Be the first to add one!' : 'Sign in to add the first tool!'}
+                No available tools at the moment. {isAuthenticated ? 'Add one to share!' : 'Sign in to add tools!'}
               </div>
             )}
           </div>
