@@ -33,6 +33,54 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_requests: {
+        Row: {
+          created_at: string | null
+          due_date: string | null
+          id: string
+          requester_id: string | null
+          return_date: string | null
+          status: Database["public"]["Enums"]["request_status"] | null
+          tool_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          requester_id?: string | null
+          return_date?: string | null
+          status?: Database["public"]["Enums"]["request_status"] | null
+          tool_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          requester_id?: string | null
+          return_date?: string | null
+          status?: Database["public"]["Enums"]["request_status"] | null
+          tool_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_requests_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tools: {
         Row: {
           created_at: string | null
@@ -82,7 +130,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      request_status: "pending" | "approved" | "rejected" | "returned"
     }
     CompositeTypes: {
       [_ in never]: never

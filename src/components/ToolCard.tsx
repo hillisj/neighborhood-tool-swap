@@ -3,6 +3,9 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface ToolCardProps {
   id: string;
@@ -11,7 +14,6 @@ interface ToolCardProps {
   imageUrl: string;
   owner: string;
   isAvailable: boolean;
-  onRequestCheckout?: () => void;
 }
 
 export const ToolCard = ({
@@ -21,9 +23,45 @@ export const ToolCard = ({
   imageUrl,
   owner,
   isAvailable,
-  onRequestCheckout,
 }: ToolCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isRequesting, setIsRequesting] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleRequestCheckout = async () => {
+    try {
+      setIsRequesting(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("You must be logged in to request tools");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('tool_requests')
+        .insert({
+          tool_id: id,
+          requester_id: user.id,
+          status: 'pending'
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast.error("You already have a pending request for this tool");
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success("Request sent successfully");
+        queryClient.invalidateQueries({ queryKey: ['tools'] });
+      }
+    } catch (error: any) {
+      toast.error(`Error: ${error.message}`);
+    } finally {
+      setIsRequesting(false);
+    }
+  };
 
   return (
     <Card className="overflow-hidden animate-fadeIn">
@@ -47,14 +85,15 @@ export const ToolCard = ({
         <p className="text-sm text-gray-600 mt-2">{description}</p>
         <div className="mt-4 flex items-center justify-between">
           <p className="text-sm text-gray-500">Owner: {owner}</p>
-          {isAvailable && onRequestCheckout && (
+          {isAvailable && (
             <Button
               variant="default"
               size="sm"
-              onClick={onRequestCheckout}
+              onClick={handleRequestCheckout}
+              disabled={isRequesting}
               className="bg-accent hover:bg-accent/90"
             >
-              Request
+              {isRequesting ? "Requesting..." : "Request"}
             </Button>
           )}
         </div>
