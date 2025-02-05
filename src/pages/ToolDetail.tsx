@@ -62,15 +62,13 @@ const ToolDetail = () => {
   });
 
   const handleApproveRequest = async (requestId: string) => {
-    const now = new Date().toISOString();
     const dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     
     const { error: approvalError } = await supabase
       .from('tool_requests')
       .update({ 
         status: 'approved',
-        due_date: dueDate,
-        updated_at: now
+        due_date: dueDate
       })
       .eq('id', requestId);
 
@@ -85,10 +83,7 @@ const ToolDetail = () => {
   const handleRejectRequest = async (requestId: string) => {
     const { error } = await supabase
       .from('tool_requests')
-      .update({ 
-        status: 'rejected',
-        updated_at: new Date().toISOString()
-      })
+      .update({ status: 'rejected' })
       .eq('id', requestId);
 
     if (error) {
@@ -100,14 +95,13 @@ const ToolDetail = () => {
   };
 
   const handleMarkReturned = async (requestId: string) => {
-    const now = new Date().toISOString();
+    const returnDate = new Date().toISOString();
     
     const { error } = await supabase
       .from('tool_requests')
       .update({ 
         status: 'returned',
-        return_date: now,
-        updated_at: now
+        return_date: returnDate
       })
       .eq('id', requestId);
 
