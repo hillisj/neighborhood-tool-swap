@@ -10,14 +10,14 @@ interface RequestStatusProps {
 export const RequestStatus = ({ status }: RequestStatusProps) => {
   const variants: Record<RequestStatus, "default" | "secondary" | "destructive" | "outline"> = {
     pending: "default",
-    approved: "outline", // Changed from 'success' to 'outline'
+    approved: "outline",
     rejected: "destructive",
     returned: "secondary",
   };
 
   const labels: Record<RequestStatus, string> = {
-    pending: "Pending",
-    approved: "Approved",
+    pending: "Requested",
+    approved: "Checked Out",
     rejected: "Rejected",
     returned: "Returned",
   };

@@ -18,6 +18,8 @@ interface ToolCardProps {
   requiresAuth?: boolean;
 }
 
+type ToolStatus = "available" | "requested" | "checked-out";
+
 export const ToolCard = ({
   id,
   name,
@@ -29,12 +31,12 @@ export const ToolCard = ({
 }: ToolCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
-  const [hasPendingRequest, setHasPendingRequest] = useState(false);
+  const [toolStatus, setToolStatus] = useState<ToolStatus>(isAvailable ? "available" : "checked-out");
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkPendingRequest = async () => {
+    const checkToolStatus = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
@@ -46,14 +48,29 @@ export const ToolCard = ({
         .eq('status', 'pending')
         .maybeSingle();
 
-      setHasPendingRequest(!!requests);
+      if (requests) {
+        setToolStatus("requested");
+      } else {
+        setToolStatus(isAvailable ? "available" : "checked-out");
+      }
     };
 
-    checkPendingRequest();
-  }, [id]);
+    checkToolStatus();
+  }, [id, isAvailable]);
+
+  const getStatusBadge = (status: ToolStatus) => {
+    switch (status) {
+      case "available":
+        return <Badge className="bg-emerald-500 hover:bg-emerald-600">Available</Badge>;
+      case "requested":
+        return <Badge variant="secondary" className="bg-yellow-500 hover:bg-yellow-600 text-white">Requested</Badge>;
+      case "checked-out":
+        return <Badge variant="secondary">Checked Out</Badge>;
+    }
+  };
 
   const handleRequestCheckout = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent navigation when clicking the request button
+    e.stopPropagation();
     
     if (requiresAuth) {
       toast.error("Please sign in to request tools");
@@ -71,7 +88,6 @@ export const ToolCard = ({
         return;
       }
 
-      // Create the tool request
       const { error } = await supabase
         .from('tool_requests')
         .insert({
@@ -90,7 +106,7 @@ export const ToolCard = ({
         }
       } else {
         toast.success("Request sent successfully");
-        setHasPendingRequest(true);
+        setToolStatus("requested");
         queryClient.invalidateQueries({ queryKey: ['tools'] });
       }
     } catch (error: any) {
@@ -116,12 +132,7 @@ export const ToolCard = ({
           onLoad={() => setImageLoaded(true)}
         />
         <div className="absolute top-2 right-2">
-          <Badge 
-            variant={isAvailable ? "default" : "secondary"}
-            className={isAvailable ? "bg-emerald-500 hover:bg-emerald-600" : ""}
-          >
-            {isAvailable ? "Available" : "Checked Out"}
-          </Badge>
+          {getStatusBadge(toolStatus)}
         </div>
       </div>
       <div className="p-4">
@@ -129,21 +140,19 @@ export const ToolCard = ({
         <p className="text-sm text-gray-600 mt-2">{description}</p>
         <div className="mt-4 flex items-center justify-between">
           <p className="text-sm text-gray-500">Owner: {owner}</p>
-          {isAvailable && (
+          {toolStatus === "available" && (
             <Button
-              variant={hasPendingRequest ? "secondary" : "default"}
+              variant="default"
               size="sm"
               onClick={handleRequestCheckout}
-              disabled={isRequesting || hasPendingRequest}
-              className={hasPendingRequest ? "" : "bg-accent hover:bg-accent/90"}
+              disabled={isRequesting}
+              className="bg-accent hover:bg-accent/90"
             >
-              {hasPendingRequest 
-                ? "Pending" 
-                : isRequesting 
-                  ? "Requesting..." 
-                  : requiresAuth 
-                    ? "Sign in to Request" 
-                    : "Request"}
+              {isRequesting 
+                ? "Requesting..." 
+                : requiresAuth 
+                  ? "Sign in to Request" 
+                  : "Request"}
             </Button>
           )}
         </div>
@@ -151,3 +160,4 @@ export const ToolCard = ({
     </Card>
   );
 };
+
