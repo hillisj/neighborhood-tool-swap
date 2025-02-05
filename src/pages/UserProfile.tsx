@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,12 +9,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { BottomNav } from "@/components/BottomNav";
 import { toast } from "sonner";
+import { User } from "lucide-react";
 
 const UserProfile = () => {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const { toast: toastNotification } = useToast();
   const navigate = useNavigate();
 
@@ -85,33 +86,59 @@ const UserProfile = () => {
     }
   };
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
+      setIsUploading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Create a unique file name
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
+
+      // Upload the file to Supabase storage
+      const { error: uploadError, data } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          upsert: true
+        });
 
       if (uploadError) throw uploadError;
 
+      // Get the public URL
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
 
+      // Update the avatar URL in the state
       setAvatarUrl(publicUrl);
+
+      // If not in editing mode, save immediately
+      if (!isEditing) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ avatar_url: publicUrl })
+          .eq('id', user.id);
+
+        if (updateError) throw updateError;
+
+        toastNotification({
+          title: "Success",
+          description: "Profile picture updated successfully",
+        });
+        refetch();
+      }
     } catch (error: any) {
       toastNotification({
         variant: "destructive",
         title: "Error",
         description: error.message,
       });
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -139,22 +166,29 @@ const UserProfile = () => {
 
       <main className="container max-w-md mx-auto px-4 py-6 space-y-6">
         <div className="flex flex-col items-center space-y-4">
-          <div className="relative">
+          <div className="relative group cursor-pointer">
             <Avatar className="w-24 h-24">
-              <img
-                src={avatarUrl || "/placeholder.svg"}
+              <AvatarImage
+                src={avatarUrl}
                 alt="Profile"
-                className="w-full h-full object-cover"
+                className="object-cover"
               />
+              <AvatarFallback>
+                <User className="w-12 h-12 text-gray-400" />
+              </AvatarFallback>
             </Avatar>
-            {isEditing && (
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
-            )}
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              disabled={isUploading}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-full flex items-center justify-center">
+              <span className="text-white opacity-0 group-hover:opacity-100 text-sm">
+                {isUploading ? "Uploading..." : "Change"}
+              </span>
+            </div>
           </div>
           {isEditing ? (
             <Input
