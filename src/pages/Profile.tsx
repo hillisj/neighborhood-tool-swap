@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +15,9 @@ const Profile = () => {
   const { data: ownedTools, isLoading: loadingOwned } = useQuery({
     queryKey: ['owned-tools'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from('tools')
         .select(`
@@ -25,7 +27,7 @@ const Profile = () => {
             email
           )
         `)
-        .eq('owner_id', (await supabase.auth.getUser()).data.user?.id);
+        .eq('owner_id', user.id);
 
       if (error) throw error;
       return data;
@@ -36,6 +38,9 @@ const Profile = () => {
   const { data: toolRequests, isLoading: loadingRequests } = useQuery({
     queryKey: ['tool-requests'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from('tool_requests')
         .select(`
@@ -60,6 +65,9 @@ const Profile = () => {
   const { data: checkedOutTools, isLoading: loadingCheckedOut } = useQuery({
     queryKey: ['checked-out-tools'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from('tool_requests')
         .select(`
@@ -72,7 +80,7 @@ const Profile = () => {
             )
           )
         `)
-        .eq('requester_id', (await supabase.auth.getUser()).data.user?.id)
+        .eq('requester_id', user.id)
         .eq('status', 'approved');
 
       if (error) throw error;
