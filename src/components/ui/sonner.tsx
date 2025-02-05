@@ -11,7 +11,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
-      position="bottom"
+      position="bottom-center"
       offset={80} // Add offset to position above bottom nav
       toastOptions={{
         classNames: {
@@ -30,4 +30,3 @@ const Toaster = ({ ...props }: ToasterProps) => {
 }
 
 export { Toaster }
-
