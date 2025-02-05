@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ToolCard } from "@/components/ToolCard";
@@ -16,26 +17,12 @@ export const OwnedTools = () => {
           profiles:owner_id (
             username,
             email
-          ),
-          tool_requests!inner (
-            status
           )
         `)
         .eq('owner_id', user.id);
 
       if (toolsError) throw toolsError;
-      
-      // Process the data to include pending requests information
-      return tools?.map(tool => ({
-        ...tool,
-        status: tool.tool_requests?.some(request => 
-          request.status === 'pending' || request.status === 'approved'
-        )
-          ? tool.tool_requests.some(request => request.status === 'approved')
-            ? 'checked_out' as const
-            : 'requested' as const
-          : 'available' as const
-      }));
+      return tools;
     },
   });
 
