@@ -1,40 +1,23 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { ToolDetailHeader } from "@/components/tool-detail/ToolDetailHeader";
 import { ToolDetailSkeleton } from "@/components/tool-detail/ToolDetailSkeleton";
 import { ToolDetailInfo } from "@/components/tool-detail/ToolDetailInfo";
 import { ToolRequests } from "@/components/tool-detail/ToolRequests";
 import { CurrentCheckout } from "@/components/tool-detail/CurrentCheckout";
 import { DeleteToolDialog } from "@/components/tool-detail/DeleteToolDialog";
+import { ToolImage } from "@/components/tool-detail/ToolImage";
 import { BottomNav } from "@/components/BottomNav";
+import { useToolDetail } from "@/hooks/useToolDetail";
+import { useToolRequests } from "@/hooks/useToolRequests";
+import { useActiveCheckout } from "@/hooks/useActiveCheckout";
 
 const ToolDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-
-  const { data: tool, isLoading: loadingTool } = useQuery({
-    queryKey: ['tool', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tools')
-        .select(`
-          *,
-          profiles:owner_id (
-            username,
-            email
-          )
-        `)
-        .eq('id', id)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
-  });
 
   const { data: currentUser } = useQuery({
     queryKey: ['current-user'],
@@ -44,51 +27,12 @@ const ToolDetail = () => {
     },
   });
 
-  const { data: activeCheckout } = useQuery({
-    queryKey: ['active-checkout', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tool_requests')
-        .select(`
-          *,
-          profiles:requester_id (
-            username,
-            email,
-            avatar_url
-          )
-        `)
-        .eq('tool_id', id)
-        .eq('status', 'approved')
-        .maybeSingle();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!id && tool?.status === 'checked_out',
-  });
-
-  const { data: requests = [], isLoading: loadingRequests } = useQuery({
-    queryKey: ['tool-requests', id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tool_requests')
-        .select(`
-          *,
-          profiles:requester_id (
-            username,
-            email,
-            avatar_url
-          )
-        `)
-        .eq('tool_id', id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { tool, loadingTool } = useToolDetail(id!);
+  const { requests } = useToolRequests(id!);
+  const { activeCheckout } = useActiveCheckout(id!, tool?.status || '');
 
   const hasPendingRequests = requests.some(request => request.status === 'pending');
+  const isOwner = currentUser?.id === tool?.owner_id;
 
   const handleMarkReturned = async () => {
     if (!activeCheckout) return;
@@ -182,14 +126,12 @@ const ToolDetail = () => {
       <div className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-2xl font-bold text-gray-900">Tool not found</h1>
-          <Button onClick={() => navigate(-1)}>Go back</Button>
+          <button onClick={() => navigate(-1)}>Go back</button>
         </div>
         <BottomNav />
       </div>
     );
   }
-
-  const isOwner = currentUser?.id === tool.owner_id;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -197,11 +139,7 @@ const ToolDetail = () => {
         <ToolDetailHeader />
 
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <img
-            src={tool.image_url || "/placeholder.svg"}
-            alt={tool.name}
-            className="w-full h-64 object-cover"
-          />
+          <ToolImage imageUrl={tool.image_url} name={tool.name} />
           
           <ToolDetailInfo tool={tool} hasPendingRequests={hasPendingRequests} />
 
