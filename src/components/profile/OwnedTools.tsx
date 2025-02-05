@@ -30,10 +30,10 @@ export const OwnedTools = () => {
       return tools.map(tool => ({
         ...tool,
         status: tool.tool_requests?.some(request => request.status === 'pending')
-          ? 'requested'
+          ? 'requested' as const
           : tool.tool_requests?.some(request => request.status === 'approved')
-            ? 'checked_out'
-            : 'available'
+            ? 'checked_out' as const
+            : 'available' as const
       }));
     },
   });

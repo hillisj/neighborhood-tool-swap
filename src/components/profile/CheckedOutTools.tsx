@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ToolCard } from "@/components/ToolCard";
@@ -19,6 +18,10 @@ export const CheckedOutTools = () => {
             profiles:owner_id (
               username,
               email
+            ),
+            tool_requests (
+              status,
+              id
             )
           )
         `)
@@ -26,7 +29,17 @@ export const CheckedOutTools = () => {
         .eq('status', 'approved');
 
       if (error) throw error;
-      return data;
+      return data.map(checkout => ({
+        ...checkout,
+        tool: {
+          ...checkout.tool,
+          status: checkout.tool.tool_requests?.some(request => request.status === 'pending')
+            ? 'requested' as const
+            : checkout.tool.tool_requests?.some(request => request.status === 'approved')
+              ? 'checked_out' as const
+              : 'available' as const
+        }
+      }));
     },
   });
 
@@ -45,6 +58,10 @@ export const CheckedOutTools = () => {
             profiles:owner_id (
               username,
               email
+            ),
+            tool_requests (
+              status,
+              id
             )
           )
         `)
@@ -52,7 +69,17 @@ export const CheckedOutTools = () => {
         .eq('status', 'pending');
 
       if (error) throw error;
-      return data;
+      return data.map(request => ({
+        ...request,
+        tool: {
+          ...request.tool,
+          status: request.tool.tool_requests?.some(req => req.status === 'pending')
+            ? 'requested' as const
+            : request.tool.tool_requests?.some(req => req.status === 'approved')
+              ? 'checked_out' as const
+              : 'available' as const
+        }
+      }));
     },
   });
 
