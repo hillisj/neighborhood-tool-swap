@@ -68,7 +68,12 @@ export const ToolContent = ({
         />
       )}
 
-      {isOwner && <DeleteToolDialog onDelete={handleDeleteTool} />}
+      {isOwner && (
+        <div className="p-6 border-t">
+          <h2 className="text-lg font-semibold mb-4">Danger Zone</h2>
+          <DeleteToolDialog onDelete={handleDeleteTool} />
+        </div>
+      )}
     </div>
   );
 };
