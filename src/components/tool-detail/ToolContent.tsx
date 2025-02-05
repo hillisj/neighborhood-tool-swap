@@ -69,8 +69,8 @@ export const ToolContent = ({
       )}
 
       {isOwner && (
-        <div className="p-6 border-t">
-          <h2 className="text-lg font-semibold mb-4">Danger Zone</h2>
+        <div className="p-6 border-t bg-red-50">
+          <h2 className="text-lg font-semibold mb-4 text-red-700">Danger Zone</h2>
           <DeleteToolDialog onDelete={handleDeleteTool} />
         </div>
       )}

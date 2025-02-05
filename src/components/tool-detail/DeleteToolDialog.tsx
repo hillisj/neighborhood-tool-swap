@@ -19,7 +19,11 @@ export const DeleteToolDialog = ({ onDelete }: DeleteToolDialogProps) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="lg" className="w-full">
+        <Button 
+          variant="destructive" 
+          size="lg" 
+          className="w-full bg-[#ea384c] hover:bg-[#ea384c]/90 text-base font-semibold py-6"
+        >
           Delete Tool
         </Button>
       </AlertDialogTrigger>
