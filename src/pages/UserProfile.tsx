@@ -9,13 +9,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { BottomNav } from "@/components/BottomNav";
+import { toast } from "sonner";
 
 const UserProfile = () => {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const { toast } = useToast();
+  const { toast: toastNotification } = useToast();
   const navigate = useNavigate();
 
   const { data: profile, refetch } = useQuery({
@@ -59,18 +60,28 @@ const UserProfile = () => {
 
       if (error) throw error;
 
-      toast({
+      toastNotification({
         title: "Success",
         description: "Profile updated successfully",
       });
       setIsEditing(false);
       refetch();
     } catch (error: any) {
-      toast({
+      toastNotification({
         variant: "destructive",
         title: "Error",
         description: error.message,
       });
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success("Logged out successfully");
+      navigate("/");
+    } catch (error) {
+      toast.error("Error logging out");
     }
   };
 
@@ -96,7 +107,7 @@ const UserProfile = () => {
 
       setAvatarUrl(publicUrl);
     } catch (error: any) {
-      toast({
+      toastNotification({
         variant: "destructive",
         title: "Error",
         description: error.message,
@@ -109,12 +120,20 @@ const UserProfile = () => {
       <header className="bg-white shadow-sm py-4 px-4 sticky top-0 z-10">
         <div className="flex items-center justify-between max-w-md mx-auto">
           <h1 className="text-xl font-semibold">Profile</h1>
-          <Button
-            variant="ghost"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            {isEditing ? "Cancel" : "Edit"}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              {isEditing ? "Cancel" : "Edit"}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
+            >
+              Log out
+            </Button>
+          </div>
         </div>
       </header>
 
