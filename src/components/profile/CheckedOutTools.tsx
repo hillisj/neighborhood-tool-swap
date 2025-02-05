@@ -10,35 +10,29 @@ export const CheckedOutTools = () => {
       if (!user) throw new Error("Not authenticated");
 
       const { data, error } = await supabase
-        .from('tool_requests')
+        .from('tools')
         .select(`
           *,
-          tool:tool_id (
-            *,
-            profiles:owner_id (
-              username,
-              email
-            ),
-            tool_requests (
-              status,
-              id
-            )
+          profiles:owner_id (
+            username,
+            email
+          ),
+          tool_requests!inner (
+            status,
+            id
           )
         `)
-        .eq('requester_id', user.id)
-        .eq('status', 'approved');
+        .eq('tool_requests.requester_id', user.id)
+        .eq('tool_requests.status', 'approved');
 
       if (error) throw error;
-      return data.map(checkout => ({
-        ...checkout,
-        tool: {
-          ...checkout.tool,
-          status: checkout.tool.tool_requests?.some(request => request.status === 'pending')
-            ? 'requested' as const
-            : checkout.tool.tool_requests?.some(request => request.status === 'approved')
-              ? 'checked_out' as const
-              : 'available' as const
-        }
+      return data.map(tool => ({
+        ...tool,
+        status: tool.tool_requests?.some(request => request.status === 'pending')
+          ? 'requested' as const
+          : tool.tool_requests?.some(request => request.status === 'approved')
+            ? 'checked_out' as const
+            : 'available' as const
       }));
     },
   });
@@ -50,35 +44,29 @@ export const CheckedOutTools = () => {
       if (!user) throw new Error("Not authenticated");
 
       const { data, error } = await supabase
-        .from('tool_requests')
+        .from('tools')
         .select(`
           *,
-          tool:tool_id (
-            *,
-            profiles:owner_id (
-              username,
-              email
-            ),
-            tool_requests (
-              status,
-              id
-            )
+          profiles:owner_id (
+            username,
+            email
+          ),
+          tool_requests!inner (
+            status,
+            id
           )
         `)
-        .eq('requester_id', user.id)
-        .eq('status', 'pending');
+        .eq('tool_requests.requester_id', user.id)
+        .eq('tool_requests.status', 'pending');
 
       if (error) throw error;
-      return data.map(request => ({
-        ...request,
-        tool: {
-          ...request.tool,
-          status: request.tool.tool_requests?.some(req => req.status === 'pending')
-            ? 'requested' as const
-            : request.tool.tool_requests?.some(req => req.status === 'approved')
-              ? 'checked_out' as const
-              : 'available' as const
-        }
+      return data.map(tool => ({
+        ...tool,
+        status: tool.tool_requests?.some(request => request.status === 'pending')
+          ? 'requested' as const
+          : tool.tool_requests?.some(request => request.status === 'approved')
+            ? 'checked_out' as const
+            : 'available' as const
       }));
     },
   });
@@ -92,19 +80,19 @@ export const CheckedOutTools = () => {
       <div className="space-y-4">
         <h2 className="text-lg font-medium">Borrowed Tools</h2>
         <div className="grid gap-4">
-          {checkedOutTools?.map((checkout) => (
+          {checkedOutTools?.map((tool) => (
             <ToolCard
-              key={checkout.tool.id}
-              id={checkout.tool.id}
-              name={checkout.tool.name}
-              description={checkout.tool.description}
-              imageUrl={checkout.tool.image_url || "/placeholder.svg"}
+              key={tool.id}
+              id={tool.id}
+              name={tool.name}
+              description={tool.description}
+              imageUrl={tool.image_url || "/placeholder.svg"}
               owner={
-                checkout.tool.profiles?.username || 
-                checkout.tool.profiles?.email?.split('@')[0] || 
+                tool.profiles?.username || 
+                tool.profiles?.email?.split('@')[0] || 
                 'Anonymous'
               }
-              status={checkout.tool.status}
+              status={tool.status}
             />
           ))}
           {checkedOutTools?.length === 0 && (
@@ -118,19 +106,19 @@ export const CheckedOutTools = () => {
       <div className="space-y-4">
         <h2 className="text-lg font-medium">Pending Requests</h2>
         <div className="grid gap-4">
-          {pendingTools?.map((request) => (
+          {pendingTools?.map((tool) => (
             <ToolCard
-              key={request.tool.id}
-              id={request.tool.id}
-              name={request.tool.name}
-              description={request.tool.description}
-              imageUrl={request.tool.image_url || "/placeholder.svg"}
+              key={tool.id}
+              id={tool.id}
+              name={tool.name}
+              description={tool.description}
+              imageUrl={tool.image_url || "/placeholder.svg"}
               owner={
-                request.tool.profiles?.username || 
-                request.tool.profiles?.email?.split('@')[0] || 
+                tool.profiles?.username || 
+                tool.profiles?.email?.split('@')[0] || 
                 'Anonymous'
               }
-              status={request.tool.status}
+              status={tool.status}
             />
           ))}
           {pendingTools?.length === 0 && (
