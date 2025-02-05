@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { User } from "lucide-react";
 
 const Profile = () => {
   const queryClient = useQueryClient();
@@ -31,8 +32,8 @@ const Profile = () => {
       <header className="bg-white shadow-sm py-4 px-4 sticky top-0 z-10">
         <div className="flex items-center justify-between max-w-md mx-auto">
           <h1 className="text-xl font-semibold">Your Tools</h1>
-          <Button variant="ghost" onClick={handleLogout}>
-            Log out
+          <Button variant="ghost" size="icon" onClick={handleLogout}>
+            <User className="h-5 w-5" />
           </Button>
         </div>
       </header>
