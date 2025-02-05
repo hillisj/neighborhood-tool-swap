@@ -47,31 +47,24 @@ export const ToolCard = ({
       
       if (!user) {
         toast.error("You must be logged in to request tools");
+        navigate('/auth');
         return;
       }
 
-      const { data: userProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .single();
-
-      if (!userProfile) {
-        toast.error("User profile not found");
-        return;
-      }
-
+      // Create the tool request
       const { error } = await supabase
         .from('tool_requests')
         .insert({
           tool_id: id,
-          requester_id: userProfile.id,
+          requester_id: user.id,
           status: 'pending'
         });
 
       if (error) {
         if (error.code === '23505') {
           toast.error("You already have a pending request for this tool");
+        } else if (error.message.includes('violates row-level security')) {
+          toast.error("You cannot request your own tools");
         } else {
           throw error;
         }
