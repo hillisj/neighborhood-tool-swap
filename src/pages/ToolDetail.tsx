@@ -58,6 +58,7 @@ const ToolDetail = () => {
           activeCheckout={activeCheckout}
           isOwner={isOwner}
           hasPendingRequests={hasPendingRequests}
+          requiresAuth={!currentUser}
         />
       </div>
       <BottomNav />
