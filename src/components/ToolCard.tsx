@@ -48,11 +48,22 @@ export const ToolCard = ({
         return;
       }
 
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      if (!userProfile) {
+        toast.error("User profile not found");
+        return;
+      }
+
       const { error } = await supabase
         .from('tool_requests')
         .insert({
           tool_id: id,
-          requester_id: user.id,
+          requester_id: userProfile.id,
           status: 'pending'
         });
 
