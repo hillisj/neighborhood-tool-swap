@@ -62,12 +62,17 @@ const ToolDetail = () => {
   });
 
   const handleApproveRequest = async (requestId: string) => {
-    const { error } = await supabase
+    // First, update the request status to approved
+    const { error: approvalError } = await supabase
       .from('tool_requests')
-      .update({ status: 'approved' })
+      .update({ 
+        status: 'approved',
+        // Set due date to 7 days from now
+        due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      })
       .eq('id', requestId);
 
-    if (error) {
+    if (approvalError) {
       toast.error("Failed to approve request");
       return;
     }
@@ -92,7 +97,10 @@ const ToolDetail = () => {
   const handleMarkReturned = async (requestId: string) => {
     const { error } = await supabase
       .from('tool_requests')
-      .update({ status: 'returned' })
+      .update({ 
+        status: 'returned',
+        return_date: new Date().toISOString()
+      })
       .eq('id', requestId);
 
     if (error) {
@@ -112,7 +120,7 @@ const ToolDetail = () => {
       <div className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-2xl font-bold text-gray-900">Tool not found</h1>
-          <Button onClick={() => navigate(-1)} className="mt-4">
+          <Button onClick={() => navigate(-1)}>
             Go back
           </Button>
         </div>
