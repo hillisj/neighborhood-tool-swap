@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import AddTool from "./pages/AddTool";
 
 const queryClient = new QueryClient();
 
@@ -57,8 +57,7 @@ const App = () => (
             path="/add"
             element={
               <ProtectedRoute>
-                {/* Add tool page component will be added later */}
-                <div>Add Tool Page</div>
+                <AddTool />
               </ProtectedRoute>
             }
           />
