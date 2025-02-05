@@ -3,6 +3,8 @@ import { ToolCard } from "@/components/ToolCard";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { UserCircle2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const fetchTools = async () => {
   const { data, error } = await supabase
@@ -31,6 +33,9 @@ const Index = () => {
       <header className="bg-white shadow-sm py-4 px-4 sticky top-0 z-10">
         <div className="flex items-center justify-between max-w-md mx-auto">
           <h1 className="text-xl font-semibold">Tool Library</h1>
+          <Link to="/user-profile" className="text-gray-600 hover:text-gray-900">
+            <UserCircle2 size={24} />
+          </Link>
         </div>
       </header>
 
