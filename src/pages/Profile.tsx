@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { User } from "lucide-react";
+import { UserCircle2 } from "lucide-react";
 
 const Profile = () => {
   const queryClient = useQueryClient();
@@ -26,9 +26,9 @@ const Profile = () => {
       <header className="bg-white shadow-sm py-4 px-4 sticky top-0 z-10">
         <div className="flex items-center justify-between max-w-md mx-auto">
           <h1 className="text-xl font-semibold">Your Tools</h1>
-          <Button variant="ghost" size="icon" onClick={handleProfileClick}>
-            <User className="h-5 w-5" />
-          </Button>
+          <Link to="/user-profile" className="text-gray-600 hover:text-gray-900">
+            <UserCircle2 size={24} />
+          </Link>
         </div>
       </header>
 
