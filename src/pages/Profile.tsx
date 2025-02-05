@@ -10,15 +10,20 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { UserCircle2 } from "lucide-react";
 
 const Profile = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("owned");
   const navigate = useNavigate();
 
-  const handleProfileClick = () => {
-    navigate('/user-profile');
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success("Logged out successfully");
+      navigate("/");
+    } catch (error) {
+      toast.error("Error logging out");
+    }
   };
 
   return (
@@ -26,9 +31,9 @@ const Profile = () => {
       <header className="bg-white shadow-sm py-4 px-4 sticky top-0 z-10">
         <div className="flex items-center justify-between max-w-md mx-auto">
           <h1 className="text-xl font-semibold">Your Tools</h1>
-          <Link to="/user-profile" className="text-gray-600 hover:text-gray-900">
-            <UserCircle2 size={24} />
-          </Link>
+          <Button variant="ghost" onClick={handleLogout}>
+            Log out
+          </Button>
         </div>
       </header>
 
