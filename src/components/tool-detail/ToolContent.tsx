@@ -74,7 +74,6 @@ export const ToolContent = ({
         return;
       }
 
-      // Check only for active requests (pending or approved)
       const { data: activeRequest } = await supabase
         .from('tool_requests')
         .select('status')
@@ -116,7 +115,9 @@ export const ToolContent = ({
     }
   };
 
-  const showRequestButton = !isOwner && tool.status === 'available';
+  // Only show the request button if the user is not the owner,
+  // the tool is available, and there are no pending requests
+  const showRequestButton = !isOwner && tool.status === 'available' && !hasPendingRequests;
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">

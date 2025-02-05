@@ -36,6 +36,8 @@ export const ToolCardActions = ({
     );
   }
 
+  // Only show the request button if the tool is available
+  // and there are no pending requests (status !== 'requested')
   if (toolStatus === "available") {
     return (
       <Button
