@@ -52,11 +52,6 @@ export const ToolCard = ({
     checkToolStatus();
   }, [id]);
 
-  // Update local state when prop changes
-  useEffect(() => {
-    setToolStatus(initialStatus);
-  }, [initialStatus]);
-
   const handleRequestCheckout = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
