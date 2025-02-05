@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,8 +29,28 @@ export const ToolCard = ({
 }: ToolCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkPendingRequest = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: requests } = await supabase
+        .from('tool_requests')
+        .select()
+        .eq('tool_id', id)
+        .eq('requester_id', user.id)
+        .eq('status', 'pending')
+        .single();
+
+      setHasPendingRequest(!!requests);
+    };
+
+    checkPendingRequest();
+  }, [id]);
 
   const handleRequestCheckout = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent navigation when clicking the request button
@@ -70,6 +90,7 @@ export const ToolCard = ({
         }
       } else {
         toast.success("Request sent successfully");
+        setHasPendingRequest(true);
         queryClient.invalidateQueries({ queryKey: ['tools'] });
       }
     } catch (error: any) {
@@ -107,13 +128,19 @@ export const ToolCard = ({
           <p className="text-sm text-gray-500">Owner: {owner}</p>
           {isAvailable && (
             <Button
-              variant="default"
+              variant={hasPendingRequest ? "secondary" : "default"}
               size="sm"
               onClick={handleRequestCheckout}
-              disabled={isRequesting}
-              className="bg-accent hover:bg-accent/90"
+              disabled={isRequesting || hasPendingRequest}
+              className={hasPendingRequest ? "" : "bg-accent hover:bg-accent/90"}
             >
-              {isRequesting ? "Requesting..." : requiresAuth ? "Sign in to Request" : "Request"}
+              {hasPendingRequest 
+                ? "Pending" 
+                : isRequesting 
+                  ? "Requesting..." 
+                  : requiresAuth 
+                    ? "Sign in to Request" 
+                    : "Request"}
             </Button>
           )}
         </div>
