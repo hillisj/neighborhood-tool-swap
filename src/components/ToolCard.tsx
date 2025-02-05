@@ -32,6 +32,7 @@ export const ToolCard = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
   const [toolStatus, setToolStatus] = useState<ToolStatus>(isAvailable ? "available" : "checked-out");
+  const [isOwner, setIsOwner] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -39,6 +40,15 @@ export const ToolCard = ({
     const checkToolStatus = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      // Check if current user is the owner
+      const { data: tool } = await supabase
+        .from('tools')
+        .select('owner_id')
+        .eq('id', id)
+        .single();
+      
+      setIsOwner(tool?.owner_id === user.id);
 
       const { data: requests } = await supabase
         .from('tool_requests')
@@ -140,7 +150,7 @@ export const ToolCard = ({
         <p className="text-sm text-gray-600 mt-2">{description}</p>
         <div className="mt-4 flex items-center justify-between">
           <p className="text-sm text-gray-500">Owner: {owner}</p>
-          {toolStatus === "available" && (
+          {toolStatus === "available" && !isOwner && (
             <Button
               variant="default"
               size="sm"
