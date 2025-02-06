@@ -28,32 +28,30 @@ const UserProfile = () => {
     refetch
   } = useProfile();
 
-  const { data: lendingCount } = useQuery({
-    queryKey: ['lending-count'],
+  const { data: lendingCount, refetch: refetchLending } = useQuery({
+    queryKey: ['lending-count', profile?.id],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
+      if (!profile?.id) return 0;
       const { data, error } = await supabase
-        .rpc('get_user_lending_count', { user_id: user.id });
+        .rpc('get_user_lending_count', { user_id: profile.id });
 
       if (error) throw error;
       return data || 0;
     },
+    enabled: !!profile?.id,
   });
 
-  const { data: borrowingCount } = useQuery({
-    queryKey: ['borrowing-count'],
+  const { data: borrowingCount, refetch: refetchBorrowing } = useQuery({
+    queryKey: ['borrowing-count', profile?.id],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
+      if (!profile?.id) return 0;
       const { data, error } = await supabase
-        .rpc('get_user_borrowing_count', { user_id: user.id });
+        .rpc('get_user_borrowing_count', { user_id: profile.id });
 
       if (error) throw error;
       return data || 0;
     },
+    enabled: !!profile?.id,
   });
 
   useEffect(() => {
@@ -61,8 +59,10 @@ const UserProfile = () => {
       setUsername(profile.username || "");
       setBio(profile.bio || "");
       setAvatarUrl(profile.avatar_url || "");
+      refetchLending();
+      refetchBorrowing();
     }
-  }, [profile]);
+  }, [profile, refetchLending, refetchBorrowing]);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -95,11 +95,11 @@ const UserProfile = () => {
 
         <div className="grid grid-cols-2 gap-4 bg-white p-4 rounded-lg shadow-sm">
           <div className="text-center">
-            <div className="text-2xl font-semibold text-blue-600">{lendingCount}</div>
+            <div className="text-2xl font-semibold text-blue-600">{lendingCount || 0}</div>
             <div className="text-sm text-gray-600">Times Lent</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-semibold text-green-600">{borrowingCount}</div>
+            <div className="text-2xl font-semibold text-green-600">{borrowingCount || 0}</div>
             <div className="text-sm text-gray-600">Times Borrowed</div>
           </div>
         </div>
