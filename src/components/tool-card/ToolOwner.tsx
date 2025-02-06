@@ -39,7 +39,7 @@ export const ToolOwner = ({ owner }: ToolOwnerProps) => {
           <User className="h-3 w-3 text-gray-400" />
         </AvatarFallback>
       </Avatar>
-      <p className="text-sm text-gray-500">Owner: {owner}</p>
+      <p className="text-sm text-gray-500">{owner}</p>
     </div>
   );
 };
