@@ -25,12 +25,27 @@ export default function Auth() {
     });
   }, [navigate]);
 
+  const formatPhoneNumber = (phone: string) => {
+    // Remove all non-digit characters
+    const cleaned = phone.replace(/\D/g, '');
+    
+    // Check if the number starts with a country code
+    if (cleaned.startsWith('1')) {
+      return `+${cleaned}`;
+    }
+    
+    // Add +1 (US/Canada) prefix if not present
+    return `+1${cleaned}`;
+  };
+
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+1${phoneNumber}`;
+      const formattedPhone = formatPhoneNumber(phoneNumber);
+      console.log('Sending code to:', formattedPhone); // Debug log
+      
       const { error } = await supabase.auth.signInWithOtp({
         phone: formattedPhone,
       });
@@ -58,7 +73,7 @@ export default function Auth() {
     setLoading(true);
     
     try {
-      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+1${phoneNumber}`;
+      const formattedPhone = formatPhoneNumber(phoneNumber);
       const { error } = await supabase.auth.verifyOtp({
         phone: formattedPhone,
         token: verificationCode,
@@ -92,12 +107,15 @@ export default function Auth() {
               <div>
                 <Input
                   type="tel"
-                  placeholder="Phone Number (e.g., +1234567890)"
+                  placeholder="Phone Number (e.g., 1234567890)"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   required
                   className="w-full"
                 />
+                <p className="text-sm text-gray-500 mt-1">
+                  Enter your 10-digit phone number. US/Canada (+1) only.
+                </p>
               </div>
               <Button
                 type="submit"
