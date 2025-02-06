@@ -175,6 +175,7 @@ export type Database = {
         | "Kitchen"
         | "Other"
         | "Games"
+        | "Outdoors"
       tool_status: "available" | "requested" | "checked_out"
     }
     CompositeTypes: {

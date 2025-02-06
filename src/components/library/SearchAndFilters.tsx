@@ -17,6 +17,7 @@ const CATEGORIES: ToolCategory[] = [
   'Tools',
   'Kitchen',
   'Games',
+  'Outdoors',
   'Other'
 ];
 
