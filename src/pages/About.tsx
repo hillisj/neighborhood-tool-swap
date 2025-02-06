@@ -32,6 +32,12 @@ const About = () => {
               <li>Report any issues or damages promptly</li>
             </ul>
           </section>
+
+          <section className="mt-8 pt-6 border-t border-gray-200">
+            <p className="text-gray-600">
+              This app created by your neighbor, Jon Hillis. If you have questions, comments, bug reports, or feedback, email me at: hillis.jd@gmail.com. Thanks! : )
+            </p>
+          </section>
         </div>
       </main>
       <BottomNav />
