@@ -8,7 +8,6 @@ import { RequestToolButton } from "./RequestToolButton";
 import { DangerZone } from "./DangerZone";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ToolRequest } from "@/components/ToolRequest";
 
 interface ToolContentProps {
   tool: Tables<"tools"> & {
@@ -60,11 +59,6 @@ export const ToolContent = ({
     },
   });
 
-  // Get user's requests for this tool
-  const userRequests = requests.filter(
-    request => request.requester_id === currentUser?.id
-  );
-
   // Check if the current user has a pending request
   const hasUserPendingRequest = currentUser && requests.some(
     request => request.requester_id === currentUser.id && request.status === 'pending'
@@ -115,25 +109,6 @@ export const ToolContent = ({
           onMarkReturned={handleMarkReturned}
           toolName={tool.name}
         />
-      )}
-
-      {!isOwner && userRequests.length > 0 && (
-        <div className="p-6 border-t">
-          <h2 className="text-lg font-semibold mb-4">Your Requests</h2>
-          <div className="space-y-4">
-            {userRequests.map((request) => (
-              <ToolRequest
-                key={request.id}
-                toolName={tool.name}
-                requesterName={request.profiles?.username || request.profiles?.email?.split('@')[0] || 'Anonymous'}
-                status={request.status}
-                dueDate={request.due_date}
-                avatarUrl={request.profiles?.avatar_url}
-                updatedAt={request.updated_at}
-              />
-            ))}
-          </div>
-        </div>
       )}
 
       {isOwner && <DangerZone onDelete={handleDeleteTool} />}
