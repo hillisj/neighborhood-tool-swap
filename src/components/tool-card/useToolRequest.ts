@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -55,6 +56,7 @@ export const useToolRequest = (toolId: string) => {
       } else {
         toast.success("Request sent successfully");
         queryClient.invalidateQueries({ queryKey: ['tools'] });
+        window.location.reload();
       }
     } catch (error: any) {
       toast.error(`Error: ${error.message}`);

@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,27 +8,6 @@ import { useToolDetail } from "@/hooks/useToolDetail";
 import { useToolRequests } from "@/hooks/useToolRequests";
 import { useActiveCheckout } from "@/hooks/useActiveCheckout";
 import { ToolContent } from "@/components/tool-detail/ToolContent";
-import { Database } from "@/integrations/supabase/types";
-import { Tables } from "@/integrations/supabase/types";
-
-type ToolCategory = Database["public"]["Enums"]["tool_category"];
-
-interface ToolWithProfile extends Tables<"tools"> {
-  profiles: {
-    username: string | null;
-    phone_number: string | null;
-    email: string | null;
-  } | null;
-}
-
-interface RequestWithProfile extends Tables<"tool_requests"> {
-  profiles: {
-    username: string | null;
-    phone_number: string | null;
-    email: string | null;
-    avatar_url: string | null;
-  } | null;
-}
 
 const ToolDetail = () => {
   const { id } = useParams();
@@ -77,7 +55,7 @@ const ToolDetail = () => {
         <ToolContent
           tool={tool}
           requests={requests}
-          activeCheckout={activeCheckout as unknown as RequestWithProfile}
+          activeCheckout={activeCheckout}
           isOwner={isOwner}
           hasPendingRequests={hasPendingRequests}
           requiresAuth={!currentUser}

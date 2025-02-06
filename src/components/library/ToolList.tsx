@@ -1,4 +1,3 @@
-
 import { ToolCard } from "@/components/ToolCard";
 
 interface Tool {
@@ -8,7 +7,7 @@ interface Tool {
   image_url: string;
   profiles: {
     username: string | null;
-    phone_number: string | null;
+    email: string | null;
   };
   status: 'available' | 'requested' | 'checked_out';
 }
@@ -42,7 +41,7 @@ export const ToolList = ({ tools, isLoading, isAuthenticated }: ToolListProps) =
           name={tool.name}
           description={tool.description}
           imageUrl={tool.image_url || "/placeholder.svg"}
-          owner={tool.profiles?.username || tool.profiles?.phone_number || 'Anonymous'}
+          owner={tool.profiles?.username || tool.profiles?.email?.split('@')[0] || 'Anonymous'}
           status={tool.status}
           requiresAuth={!isAuthenticated}
         />

@@ -10,29 +10,6 @@ import { Database } from "@/integrations/supabase/types";
 
 type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
-interface Profile {
-  username: string | null;
-  phone_number: string | null;
-  avatar_url?: string | null;
-}
-
-interface Tool {
-  id: string;
-  name: string;
-  description: string;
-  image_url: string;
-  status: 'available' | 'requested' | 'checked_out';
-  categories: ToolCategory[];
-  profiles: {
-    username: string | null;
-    phone_number: string | null;
-  };
-  owner_id: string;
-  tool_requests?: {
-    status: string;
-  }[];
-}
-
 const fetchTools = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   const currentUserId = user?.id;
@@ -43,7 +20,7 @@ const fetchTools = async () => {
       *,
       profiles:owner_id (
         username,
-        phone_number
+        email
       ),
       tool_requests (
         status
@@ -100,7 +77,7 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [userProfile, setUserProfile] = useState<Profile | null>(null);
+  const [userProfile, setUserProfile] = useState<{ username?: string | null, email?: string | null, avatar_url?: string | null } | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -127,7 +104,7 @@ const Index = () => {
   const fetchUserProfile = async (userId: string) => {
     const { data, error } = await supabase
       .from('profiles')
-      .select('username, phone_number, avatar_url')
+      .select('username, email, avatar_url')
       .eq('id', userId)
       .single();
     
