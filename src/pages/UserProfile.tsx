@@ -28,27 +28,33 @@ const UserProfile = () => {
     refetch
   } = useProfile();
 
-  const { data: lendingCount, refetch: refetchLending } = useQuery({
+  const { data: lendingCount } = useQuery({
     queryKey: ['lending-count', profile?.id],
     queryFn: async () => {
       if (!profile?.id) return 0;
       const { data, error } = await supabase
         .rpc('get_user_lending_count', { user_id: profile.id });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching lending count:', error);
+        return 0;
+      }
       return data || 0;
     },
     enabled: !!profile?.id,
   });
 
-  const { data: borrowingCount, refetch: refetchBorrowing } = useQuery({
+  const { data: borrowingCount } = useQuery({
     queryKey: ['borrowing-count', profile?.id],
     queryFn: async () => {
       if (!profile?.id) return 0;
       const { data, error } = await supabase
         .rpc('get_user_borrowing_count', { user_id: profile.id });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching borrowing count:', error);
+        return 0;
+      }
       return data || 0;
     },
     enabled: !!profile?.id,
@@ -59,10 +65,8 @@ const UserProfile = () => {
       setUsername(profile.username || "");
       setBio(profile.bio || "");
       setAvatarUrl(profile.avatar_url || "");
-      refetchLending();
-      refetchBorrowing();
     }
-  }, [profile, refetchLending, refetchBorrowing]);
+  }, [profile]);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
