@@ -67,14 +67,6 @@ export const ToolRequest = ({
                 <span className="font-bold">Returned:</span> {format(new Date(returnDate), "MMM d, yyyy")}
               </p>
             )}
-            <div className="flex items-center gap-2 mt-1">
-              <RequestStatus status={status} />
-              {status !== 'pending' && updatedAt && !returnDate && (
-                <p className="text-base text-gray-500">
-                  on {format(new Date(updatedAt), "MMM d, yyyy")}
-                </p>
-              )}
-            </div>
           </div>
         </div>
       </div>
