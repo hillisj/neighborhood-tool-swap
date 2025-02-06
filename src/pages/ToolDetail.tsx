@@ -86,7 +86,6 @@ const ToolDetail = () => {
     enabled: !!id && tool?.status === 'checked_out',
   });
 
-  const hasPendingRequests = requests.some(request => request.status === 'pending');
   const isOwner = currentUser?.id === tool?.owner_id;
 
   if (loadingTool) {
@@ -119,7 +118,7 @@ const ToolDetail = () => {
           requests={requests}
           activeCheckout={activeCheckout}
           isOwner={isOwner}
-          hasPendingRequests={hasPendingRequests}
+          isLoading={loadingRequests}
           requiresAuth={!currentUser}
         />
       </div>
