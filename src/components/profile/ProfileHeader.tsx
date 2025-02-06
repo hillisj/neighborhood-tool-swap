@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
+import { Pencil, X } from "lucide-react";
 
 interface ProfileHeaderProps {
   isEditing: boolean;
@@ -22,7 +22,7 @@ export const ProfileHeader = ({
             size="icon"
             onClick={() => setIsEditing(!isEditing)}
           >
-            {isEditing ? "Cancel" : <Pencil className="h-4 w-4" />}
+            {isEditing ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
           </Button>
           <Button
             variant="ghost"
