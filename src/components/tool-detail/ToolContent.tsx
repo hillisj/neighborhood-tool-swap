@@ -74,7 +74,12 @@ export const ToolContent = ({
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      <ToolImage imageUrl={tool.image_url} name={tool.name} />
+      <ToolImage 
+        imageUrl={tool.image_url} 
+        name={tool.name} 
+        status={tool.status}
+        hasPendingRequests={hasPendingRequests}
+      />
       
       <ToolDetailInfo 
         tool={tool} 
