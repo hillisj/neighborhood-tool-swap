@@ -9,10 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 
 export default function Auth() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
+  const [showVerification, setShowVerification] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -25,29 +25,63 @@ export default function Auth() {
     });
   }, [navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        navigate("/");
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) throw error;
-        toast({
-          title: "Success!",
-          description: "Please check your email to verify your account.",
-        });
-        setIsLogin(true);
+      // Format phone number to ensure +1 prefix
+      const formattedPhone = phone.startsWith('+1') ? phone : `+1${phone}`;
+      
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: formattedPhone,
+      });
+
+      if (error) throw error;
+
+      setShowVerification(true);
+      toast({
+        title: "Success!",
+        description: "Please check your phone for the verification code.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const formattedPhone = phone.startsWith('+1') ? phone : `+1${phone}`;
+      
+      const { error } = await supabase.auth.verifyOtp({
+        phone: formattedPhone,
+        token: verificationCode,
+        type: 'sms',
+      });
+
+      if (error) throw error;
+      
+      // Update profile with phone number
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ phone_number: formattedPhone })
+          .eq('id', user.id);
+
+        if (profileError) throw profileError;
       }
+
+      navigate("/");
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -64,51 +98,63 @@ export default function Auth() {
       <div className="p-4 pb-20">
         <Card className="w-full max-w-md p-6 mx-auto mt-8">
           <h1 className="text-2xl font-semibold text-center mb-6">
-            {isLogin ? "Welcome Back" : "Create an Account"}
+            {showVerification ? "Enter Verification Code" : "Login with Phone"}
           </h1>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+          {!showVerification ? (
+            <form onSubmit={handleSendCode} className="space-y-4">
+              <div>
+                <Input
+                  type="tel"
+                  placeholder="Phone Number (e.g. +12345678900)"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  pattern="^\+?1[0-9]{10}$"
+                  className="w-full"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Format: +1 followed by your 10-digit number
+                </p>
+              </div>
+              <Button
+                type="submit"
                 className="w-full"
-              />
-            </div>
-            <div>
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                disabled={loading}
+              >
+                {loading ? "Sending..." : "Send Verification Code"}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyCode} className="space-y-4">
+              <div>
+                <Input
+                  type="text"
+                  placeholder="Enter verification code"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  required
+                  className="w-full"
+                />
+              </div>
+              <Button
+                type="submit"
                 className="w-full"
-                minLength={6}
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-            >
-              {loading ? "Loading..." : isLogin ? "Sign In" : "Sign Up"}
-            </Button>
-          </form>
-          <p className="text-center mt-4 text-sm text-gray-600">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="ml-1 text-accent hover:underline"
-            >
-              {isLogin ? "Sign Up" : "Sign In"}
-            </button>
-          </p>
+                disabled={loading}
+              >
+                {loading ? "Verifying..." : "Verify Code"}
+              </Button>
+              <button
+                type="button"
+                onClick={() => setShowVerification(false)}
+                className="w-full text-sm text-gray-500 hover:text-gray-700"
+              >
+                Back to Phone Number
+              </button>
+            </form>
+          )}
         </Card>
       </div>
       <BottomNav />
     </div>
   );
-};
-
+}
