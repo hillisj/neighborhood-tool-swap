@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Database } from "@/integrations/supabase/types";
@@ -14,6 +15,7 @@ const CATEGORIES: ToolCategory[] = [
   'Gardening',
   'Tools',
   'Kitchen',
+  'Games',
   'Other'
 ];
 
