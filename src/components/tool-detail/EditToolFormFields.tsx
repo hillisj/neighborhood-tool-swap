@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Database } from "@/integrations/supabase/types";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { CategorySelect } from "@/components/shared/CategorySelect";
 
 type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
@@ -24,19 +24,6 @@ export const EditToolFormFields = ({
   setCategory,
   setImage,
 }: EditToolFormFieldsProps) => {
-  const categories: ToolCategory[] = [
-    'Kids',
-    'Music',
-    'Electronics',
-    'Exercise',
-    'Emergency',
-    'Household',
-    'Gardening',
-    'Tools',
-    'Kitchen',
-    'Other'
-  ];
-
   return (
     <>
       <div className="space-y-2">
@@ -54,24 +41,10 @@ export const EditToolFormFields = ({
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Category</label>
-        <ToggleGroup
-          type="single"
-          value={category}
-          onValueChange={(value: ToolCategory) => {
-            if (value) setCategory(value);
-          }}
-          className="flex flex-wrap gap-2"
-        >
-          {categories.map((cat) => (
-            <ToggleGroupItem
-              key={cat}
-              value={cat}
-              className="rounded-full px-4 py-2 text-sm"
-            >
-              {cat}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        <CategorySelect
+          selectedCategory={category}
+          onCategoryChange={setCategory}
+        />
       </div>
 
       <div className="space-y-2">

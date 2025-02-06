@@ -1,27 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Database } from "@/integrations/supabase/types";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { CategorySelect } from "@/components/shared/CategorySelect";
 
 type ToolCategory = Database["public"]["Enums"]["tool_category"];
-
-const categories: ToolCategory[] = [
-  'Kids',
-  'Music',
-  'Electronics',
-  'Exercise',
-  'Emergency',
-  'Household',
-  'Gardening',
-  'Tools',
-  'Kitchen',
-  'Other'
-];
 
 export const AddToolForm = () => {
   const [name, setName] = useState("");
@@ -110,24 +97,10 @@ export const AddToolForm = () => {
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Category</label>
-        <ToggleGroup
-          type="single"
-          value={category}
-          onValueChange={(value: ToolCategory) => {
-            if (value) setCategory(value);
-          }}
-          className="flex flex-wrap gap-2"
-        >
-          {categories.map((cat) => (
-            <ToggleGroupItem
-              key={cat}
-              value={cat}
-              className="rounded-full px-4 py-2 text-sm"
-            >
-              {cat}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        <CategorySelect
+          selectedCategory={category}
+          onCategoryChange={setCategory}
+        />
       </div>
 
       <div className="space-y-2">
