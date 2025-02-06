@@ -38,7 +38,6 @@ const UserProfile = () => {
       <ProfileHeader 
         isEditing={isEditing}
         setIsEditing={setIsEditing}
-        handleLogout={handleLogout}
       />
 
       <main className="container max-w-md mx-auto px-4 py-6 space-y-6">
@@ -82,6 +81,15 @@ const UserProfile = () => {
             Save Changes
           </Button>
         )}
+
+        <Button 
+          variant="destructive" 
+          size="lg" 
+          className="w-full bg-[#ea384c] hover:bg-[#ea384c]/90 text-base font-semibold py-6"
+          onClick={handleLogout}
+        >
+          Log Out
+        </Button>
       </main>
       <BottomNav />
     </div>
