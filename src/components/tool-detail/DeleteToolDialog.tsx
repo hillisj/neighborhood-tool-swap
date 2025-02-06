@@ -1,3 +1,4 @@
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,14 +25,14 @@ export const DeleteToolDialog = ({ onDelete }: DeleteToolDialogProps) => {
           size="lg" 
           className="w-full bg-[#ea384c] hover:bg-[#ea384c]/90 text-base font-semibold py-6"
         >
-          Delete Tool
+          Delete Item
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Tool</AlertDialogTitle>
+          <AlertDialogTitle>Delete Item</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete this tool? This action cannot be undone.
+            Are you sure you want to delete this item? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
