@@ -45,7 +45,7 @@ export const BottomNav = ({ authRequired }: BottomNavProps) => {
           }`}
         >
           <Plus size={24} />
-          <span className="text-xs">Add Tool</span>
+          <span className="text-xs">Add Item</span>
         </button>
         <button
           onClick={() => handleProtectedNavigation('/profile')}
@@ -54,7 +54,7 @@ export const BottomNav = ({ authRequired }: BottomNavProps) => {
           }`}
         >
           <User size={24} />
-          <span className="text-xs">Your Tools</span>
+          <span className="text-xs">My Items</span>
         </button>
       </nav>
     </div>
