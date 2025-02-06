@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { ToolImage } from "./tool-card/ToolImage";
 import { ToolCardActions } from "./tool-card/ToolCardActions";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { User } from "lucide-react";
 
 interface ToolCardProps {
   id: string;
@@ -28,6 +30,7 @@ export const ToolCard = ({
 }: ToolCardProps) => {
   const [isRequesting, setIsRequesting] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [ownerAvatar, setOwnerAvatar] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -52,6 +55,23 @@ export const ToolCard = ({
     };
     
     checkOwnership();
+  }, [owner]);
+
+  useEffect(() => {
+    const fetchOwnerAvatar = async () => {
+      const ownerUsername = owner.split('@')[0];
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .or(`username.eq.${ownerUsername},email.ilike.${ownerUsername}@%`)
+        .single();
+
+      if (profile) {
+        setOwnerAvatar(profile.avatar_url);
+      }
+    };
+
+    fetchOwnerAvatar();
   }, [owner]);
 
   const handleRequestCheckout = async (e: React.MouseEvent) => {
@@ -132,7 +152,19 @@ export const ToolCard = ({
         <h3 className="font-semibold text-lg">{name}</h3>
         <p className="text-sm text-gray-600 mt-2">{description}</p>
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm text-gray-500">Owner: {owner}</p>
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              <AvatarImage
+                src={ownerAvatar || ''}
+                alt={owner}
+                className="object-cover"
+              />
+              <AvatarFallback>
+                <User className="h-3 w-3 text-gray-400" />
+              </AvatarFallback>
+            </Avatar>
+            <p className="text-sm text-gray-500">Owner: {owner}</p>
+          </div>
           <ToolCardActions
             isOwner={isOwner}
             toolId={id}
