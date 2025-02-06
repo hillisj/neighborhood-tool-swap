@@ -69,13 +69,25 @@ export const useToolActions = (id: string) => {
   };
 
   const handleDeleteTool = async () => {
-    const { error } = await supabase
+    // First delete any associated requests
+    const { error: requestsError } = await supabase
+      .from('tool_requests')
+      .delete()
+      .eq('tool_id', id);
+
+    if (requestsError) {
+      toast.error("Failed to delete tool requests");
+      return;
+    }
+
+    // Then delete the tool
+    const { error: toolError } = await supabase
       .from('tools')
       .delete()
       .eq('id', id);
 
-    if (error) {
-      if (error.code === '42501') {
+    if (toolError) {
+      if (toolError.code === '42501') {
         toast.error("You don't have permission to delete this tool");
       } else {
         toast.error("Failed to delete tool. Please try again.");
