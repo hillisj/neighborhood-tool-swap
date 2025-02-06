@@ -1,12 +1,11 @@
 import { Tables } from "@/integrations/supabase/types";
+import { ToolImage } from "./ToolImage";
 import { ToolDetailInfo } from "./ToolDetailInfo";
 import { ToolRequests } from "./ToolRequests";
 import { CurrentCheckout } from "./CurrentCheckout";
-import { ToolImage } from "./ToolImage";
-import { useToolActions } from "@/hooks/useToolActions";
-import { RequestToolButton } from "./RequestToolButton";
 import { DangerZone } from "./DangerZone";
-import { useQuery } from "@tanstack/react-query";
+import { RequestToolButton } from "./RequestToolButton";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ToolContentProps {
@@ -30,83 +29,71 @@ interface ToolContentProps {
       avatar_url: string | null;
     } | null;
   } | null;
+  isLoading: boolean;
   isOwner: boolean;
-  hasPendingRequests: boolean;
-  requiresAuth?: boolean;
 }
 
-export const ToolContent = ({ 
-  tool, 
-  requests, 
-  activeCheckout, 
-  isOwner, 
-  hasPendingRequests,
-  requiresAuth,
+export const ToolContent = ({
+  tool,
+  requests,
+  activeCheckout,
+  isLoading,
+  isOwner,
 }: ToolContentProps) => {
-  const {
-    handleMarkReturned,
-    handleApproveRequest,
-    handleRejectRequest,
-    handleDeleteTool,
-  } = useToolActions(tool.id);
+  const { user } = useAuth();
 
-  // Get the current user to check for their pending requests
-  const { data: currentUser } = useQuery({
-    queryKey: ['current-user'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      return user;
-    },
-  });
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-  // Check if the current user has a pending request
-  const hasUserPendingRequest = currentUser && requests.some(
-    request => request.requester_id === currentUser.id && request.status === 'pending'
+  if (!tool) {
+    return <div>Tool not found</div>;
+  }
+
+  const pendingRequests = requests.filter(
+    (request) =>
+      request.requester_id === user?.id && request.status === "pending"
   );
 
-  // Only show the request button if:
-  // 1. User is not the owner
-  // 2. Tool is available
-  // 3. User doesn't have a pending request
-  const showRequestButton = !isOwner && 
-    tool.status === 'available' && 
-    !hasUserPendingRequest;
+  const canRequest =
+    !isOwner &&
+    tool.status === "available" &&
+    pendingRequests.length === 0;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      <ToolImage imageUrl={tool.image_url} name={tool.name} />
-      
-      <ToolDetailInfo 
-        tool={tool} 
-        hasPendingRequests={hasPendingRequests}
-        isOwner={isOwner}
+    <div className="space-y-8">
+      <ToolImage
+        imageUrl={tool.image_url || "/placeholder.svg"}
+        name={tool.name}
       />
 
-      {showRequestButton && (
-        <RequestToolButton
-          toolId={tool.id}
-          requiresAuth={requiresAuth}
-        />
-      )}
+      <div className="space-y-6">
+        {!isOwner && canRequest && (
+          <RequestToolButton id={tool.id} />
+        )}
 
-      {isOwner && tool.status === 'checked_out' && activeCheckout && (
-        <CurrentCheckout
-          checkout={activeCheckout}
-          onMarkReturned={() => handleMarkReturned(activeCheckout.id)}
-        />
-      )}
+        {tool.status !== "available" && (
+          <CurrentCheckout
+            status={tool.status}
+            checkout={activeCheckout}
+          />
+        )}
 
-      {isOwner && requests && requests.length > 0 && (
-        <ToolRequests
-          requests={requests}
-          onApprove={handleApproveRequest}
-          onReject={handleRejectRequest}
-          onMarkReturned={handleMarkReturned}
-          toolName={tool.name}
+        <ToolDetailInfo
+          tool={tool}
+          isOwner={isOwner}
         />
-      )}
 
-      {isOwner && <DangerZone onDelete={handleDeleteTool} />}
+        {isOwner && (
+          <>
+            <ToolRequests
+              requests={requests}
+              toolId={tool.id}
+            />
+            <DangerZone toolId={tool.id} />
+          </>
+        )}
+      </div>
     </div>
   );
 };
