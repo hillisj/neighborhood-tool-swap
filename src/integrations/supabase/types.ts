@@ -87,6 +87,7 @@ export type Database = {
       tools: {
         Row: {
           brand: string | null
+          category: Database["public"]["Enums"]["tool_category"]
           condition: string | null
           created_at: string | null
           description: string | null
@@ -102,6 +103,7 @@ export type Database = {
         }
         Insert: {
           brand?: string | null
+          category: Database["public"]["Enums"]["tool_category"]
           condition?: string | null
           created_at?: string | null
           description?: string | null
@@ -117,6 +119,7 @@ export type Database = {
         }
         Update: {
           brand?: string | null
+          category?: Database["public"]["Enums"]["tool_category"]
           condition?: string | null
           created_at?: string | null
           description?: string | null
@@ -149,6 +152,15 @@ export type Database = {
     }
     Enums: {
       request_status: "pending" | "approved" | "rejected" | "returned"
+      tool_category:
+        | "Kids"
+        | "Music"
+        | "Electronics"
+        | "Exercise"
+        | "Emergency"
+        | "Household"
+        | "Gardening"
+        | "Tools"
       tool_status: "available" | "requested" | "checked_out"
     }
     CompositeTypes: {

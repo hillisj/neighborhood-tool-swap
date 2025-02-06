@@ -1,16 +1,23 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function AddTool() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<string>("");
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -57,6 +64,7 @@ export default function AddTool() {
         description,
         image_url: imageUrl,
         owner_id: user.id,
+        category,
       });
 
       if (error) throw error;
@@ -77,6 +85,17 @@ export default function AddTool() {
       setLoading(false);
     }
   };
+
+  const categories = [
+    'Kids',
+    'Music',
+    'Electronics',
+    'Exercise',
+    'Emergency',
+    'Household',
+    'Gardening',
+    'Tools'
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -99,6 +118,28 @@ export default function AddTool() {
                 minLength={2}
                 placeholder="e.g., Power Drill"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="category" className="text-sm font-medium">
+                Category
+              </label>
+              <Select
+                required
+                value={category}
+                onValueChange={setCategory}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
