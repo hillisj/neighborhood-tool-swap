@@ -31,7 +31,7 @@ export const useToolRequests = (id: string) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as RequestWithProfile[];
+      return data as unknown as RequestWithProfile[];
     },
   });
 

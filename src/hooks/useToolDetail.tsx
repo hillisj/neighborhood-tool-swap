@@ -29,7 +29,7 @@ export const useToolDetail = (id: string) => {
         .maybeSingle();
 
       if (error) throw error;
-      return data as ToolWithProfile;
+      return data as unknown as ToolWithProfile;
     },
   });
 
