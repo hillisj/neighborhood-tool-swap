@@ -36,6 +36,7 @@ export const EditToolFormFields = ({
           onChange={(e) => setName(e.target.value)}
           required
           minLength={2}
+          autoComplete="off"
         />
       </div>
 
