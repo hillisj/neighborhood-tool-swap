@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -10,7 +11,7 @@ export const useToolOwnership = (owner: string) => {
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('username, email')
+          .select('username, phone_number')
           .eq('id', user.id)
           .single();
         
@@ -18,7 +19,7 @@ export const useToolOwnership = (owner: string) => {
           const ownerUsername = owner.split('@')[0];
           setIsOwner(
             profile.username === owner || 
-            profile.email?.split('@')[0] === ownerUsername
+            profile.phone_number === owner
           );
         }
       }
