@@ -9,110 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      item_requests: {
-        Row: {
-          created_at: string | null
-          due_date: string | null
-          id: string
-          item_id: string | null
-          requester_id: string | null
-          return_date: string | null
-          status: Database["public"]["Enums"]["request_status"] | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          due_date?: string | null
-          id?: string
-          item_id?: string | null
-          requester_id?: string | null
-          return_date?: string | null
-          status?: Database["public"]["Enums"]["request_status"] | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          due_date?: string | null
-          id?: string
-          item_id?: string | null
-          requester_id?: string | null
-          return_date?: string | null
-          status?: Database["public"]["Enums"]["request_status"] | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tool_requests_requester_id_fkey"
-            columns: ["requester_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tool_requests_tool_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      items: {
-        Row: {
-          brand: string | null
-          condition: string | null
-          created_at: string | null
-          description: string | null
-          id: string
-          image_url: string | null
-          maintenance_notes: string | null
-          model: string | null
-          name: string
-          owner_id: string
-          purchase_date: string | null
-          status: Database["public"]["Enums"]["item_status"]
-          updated_at: string | null
-        }
-        Insert: {
-          brand?: string | null
-          condition?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          maintenance_notes?: string | null
-          model?: string | null
-          name: string
-          owner_id: string
-          purchase_date?: string | null
-          status?: Database["public"]["Enums"]["item_status"]
-          updated_at?: string | null
-        }
-        Update: {
-          brand?: string | null
-          condition?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          maintenance_notes?: string | null
-          model?: string | null
-          name?: string
-          owner_id?: string
-          purchase_date?: string | null
-          status?: Database["public"]["Enums"]["item_status"]
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tools_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -140,6 +36,110 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_requests: {
+        Row: {
+          created_at: string | null
+          due_date: string | null
+          id: string
+          requester_id: string | null
+          return_date: string | null
+          status: Database["public"]["Enums"]["request_status"] | null
+          tool_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          requester_id?: string | null
+          return_date?: string | null
+          status?: Database["public"]["Enums"]["request_status"] | null
+          tool_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          requester_id?: string | null
+          return_date?: string | null
+          status?: Database["public"]["Enums"]["request_status"] | null
+          tool_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_requests_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tools: {
+        Row: {
+          brand: string | null
+          condition: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          maintenance_notes: string | null
+          model: string | null
+          name: string
+          owner_id: string
+          purchase_date: string | null
+          status: Database["public"]["Enums"]["tool_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          brand?: string | null
+          condition?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          maintenance_notes?: string | null
+          model?: string | null
+          name: string
+          owner_id: string
+          purchase_date?: string | null
+          status?: Database["public"]["Enums"]["tool_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          brand?: string | null
+          condition?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          maintenance_notes?: string | null
+          model?: string | null
+          name?: string
+          owner_id?: string
+          purchase_date?: string | null
+          status?: Database["public"]["Enums"]["tool_status"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tools_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -148,8 +148,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      item_status: "available" | "requested" | "checked_out"
       request_status: "pending" | "approved" | "rejected" | "returned"
+      tool_status: "available" | "requested" | "checked_out"
     }
     CompositeTypes: {
       [_ in never]: never

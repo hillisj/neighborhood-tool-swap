@@ -6,7 +6,7 @@ export const useToolDetail = (id: string) => {
     queryKey: ['tool', id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('items')
+        .from('tools')
         .select(`
           *,
           profiles:owner_id (

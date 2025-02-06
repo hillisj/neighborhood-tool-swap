@@ -9,29 +9,29 @@ export const OwnedTools = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase
-        .from('items')
+      const { data: tools, error: toolsError } = await supabase
+        .from('tools')
         .select(`
           *,
           profiles:owner_id (
             username,
             email
           ),
-          item_requests (
+          tool_requests (
             status,
             id
           )
         `)
         .eq('owner_id', user.id);
 
-      if (error) throw error;
+      if (toolsError) throw toolsError;
 
-      // Process items to include request status
-      return data.map(item => ({
-        ...item,
-        status: item.item_requests?.some(request => request.status === 'pending')
+      // Process tools to include request status
+      return tools.map(tool => ({
+        ...tool,
+        status: tool.tool_requests?.some(request => request.status === 'pending')
           ? 'requested' as const
-          : item.item_requests?.some(request => request.status === 'approved')
+          : tool.tool_requests?.some(request => request.status === 'approved')
             ? 'checked_out' as const
             : 'available' as const
       }));
@@ -39,30 +39,30 @@ export const OwnedTools = () => {
   });
 
   if (loadingOwned) {
-    return <div className="text-center text-gray-500">Loading your items...</div>;
+    return <div className="text-center text-gray-500">Loading your tools...</div>;
   }
 
-  // Group items by status
-  const checkedOutItems = ownedTools?.filter(item => item.status === 'checked_out') || [];
-  const requestedItems = ownedTools?.filter(item => item.status === 'requested') || [];
-  const availableItems = ownedTools?.filter(item => item.status === 'available') || [];
+  // Group tools by status
+  const checkedOutTools = ownedTools?.filter(tool => tool.status === 'checked_out') || [];
+  const requestedTools = ownedTools?.filter(tool => tool.status === 'requested') || [];
+  const availableTools = ownedTools?.filter(tool => tool.status === 'available') || [];
 
-  const renderItemSection = (items: typeof ownedTools, title: string) => {
-    if (!items || items.length === 0) return null;
+  const renderToolSection = (tools: typeof ownedTools, title: string) => {
+    if (!tools || tools.length === 0) return null;
     
     return (
       <div className="space-y-4">
         <h3 className="text-md font-medium text-gray-600">{title}</h3>
         <div className="grid gap-4">
-          {items.map((item) => (
+          {tools.map((tool) => (
             <ToolCard
-              key={item.id}
-              id={item.id}
-              name={item.name}
-              description={item.description || ''}
-              imageUrl={item.image_url || "/placeholder.svg"}
-              owner={item.profiles?.username || item.profiles?.email?.split('@')[0] || 'Anonymous'}
-              status={item.status}
+              key={tool.id}
+              id={tool.id}
+              name={tool.name}
+              description={tool.description}
+              imageUrl={tool.image_url || "/placeholder.svg"}
+              owner={tool.profiles?.username || tool.profiles?.email?.split('@')[0] || 'Anonymous'}
+              status={tool.status}
             />
           ))}
         </div>
@@ -72,15 +72,15 @@ export const OwnedTools = () => {
 
   return (
     <div className="space-y-6">
-      {checkedOutItems.length === 0 && requestedItems.length === 0 && availableItems.length === 0 ? (
+      {checkedOutTools.length === 0 && requestedTools.length === 0 && availableTools.length === 0 ? (
         <p className="text-center text-gray-500">
-          You haven't added any items yet.
+          You haven't added any tools yet.
         </p>
       ) : (
         <div className="space-y-8">
-          {renderItemSection(checkedOutItems, "Checked Out")}
-          {renderItemSection(requestedItems, "Requested")}
-          {renderItemSection(availableItems, "Available")}
+          {renderToolSection(checkedOutTools, "Checked Out")}
+          {renderToolSection(requestedTools, "Requested")}
+          {renderToolSection(availableTools, "Available")}
         </div>
       )}
     </div>

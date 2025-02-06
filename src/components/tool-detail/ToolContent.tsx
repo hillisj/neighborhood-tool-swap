@@ -1,100 +1,112 @@
 import { Tables } from "@/integrations/supabase/types";
-import { ToolImage } from "./ToolImage";
 import { ToolDetailInfo } from "./ToolDetailInfo";
 import { ToolRequests } from "./ToolRequests";
 import { CurrentCheckout } from "./CurrentCheckout";
-import { DangerZone } from "./DangerZone";
+import { ToolImage } from "./ToolImage";
+import { useToolActions } from "@/hooks/useToolActions";
 import { RequestToolButton } from "./RequestToolButton";
-import { useAuth } from "@/hooks/useAuth";
+import { DangerZone } from "./DangerZone";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ToolContentProps {
-  tool: Tables<"items"> & {
+  tool: Tables<"tools"> & {
     profiles: {
       username: string | null;
       email: string | null;
     } | null;
   };
-  requests: (Tables<"item_requests"> & {
+  requests: (Tables<"tool_requests"> & {
     profiles: {
       username: string | null;
       email: string | null;
       avatar_url: string | null;
     } | null;
   })[];
-  activeCheckout: Tables<"item_requests"> & {
+  activeCheckout: Tables<"tool_requests"> & {
     profiles: {
       username: string | null;
       email: string | null;
       avatar_url: string | null;
     } | null;
   } | null;
-  isLoading: boolean;
   isOwner: boolean;
+  hasPendingRequests: boolean;
   requiresAuth?: boolean;
 }
 
-export const ToolContent = ({
-  tool,
-  requests,
-  activeCheckout,
-  isLoading,
-  isOwner,
+export const ToolContent = ({ 
+  tool, 
+  requests, 
+  activeCheckout, 
+  isOwner, 
+  hasPendingRequests,
   requiresAuth,
 }: ToolContentProps) => {
-  const { user } = useAuth();
+  const {
+    handleMarkReturned,
+    handleApproveRequest,
+    handleRejectRequest,
+    handleDeleteTool,
+  } = useToolActions(tool.id);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  // Get the current user to check for their pending requests
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+  });
 
-  if (!tool) {
-    return <div>Tool not found</div>;
-  }
-
-  const pendingRequests = requests.filter(
-    (request) =>
-      request.requester_id === user?.id && request.status === "pending"
+  // Check if the current user has a pending request
+  const hasUserPendingRequest = currentUser && requests.some(
+    request => request.requester_id === currentUser.id && request.status === 'pending'
   );
 
-  const canRequest =
-    !isOwner &&
-    tool.status === "available" &&
-    pendingRequests.length === 0;
+  // Only show the request button if:
+  // 1. User is not the owner
+  // 2. Tool is available
+  // 3. User doesn't have a pending request
+  const showRequestButton = !isOwner && 
+    tool.status === 'available' && 
+    !hasUserPendingRequest;
 
   return (
-    <div className="space-y-8">
-      <ToolImage
-        imageUrl={tool.image_url || "/placeholder.svg"}
-        name={tool.name}
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <ToolImage imageUrl={tool.image_url} name={tool.name} />
+      
+      <ToolDetailInfo 
+        tool={tool} 
+        hasPendingRequests={hasPendingRequests}
+        isOwner={isOwner}
       />
 
-      <div className="space-y-6">
-        {!isOwner && canRequest && (
-          <RequestToolButton toolId={tool.id} requiresAuth={requiresAuth} />
-        )}
-
-        {tool.status !== "available" && activeCheckout && (
-          <CurrentCheckout
-            checkout={activeCheckout}
-            onMarkReturned={() => {}}
-          />
-        )}
-
-        <ToolDetailInfo
-          tool={tool}
-          isOwner={isOwner}
+      {showRequestButton && (
+        <RequestToolButton
+          toolId={tool.id}
+          requiresAuth={requiresAuth}
         />
+      )}
 
-        {isOwner && (
-          <>
-            <ToolRequests
-              requests={requests}
-              toolId={tool.id}
-            />
-            <DangerZone toolId={tool.id} onDelete={() => {}} />
-          </>
-        )}
-      </div>
+      {isOwner && tool.status === 'checked_out' && activeCheckout && (
+        <CurrentCheckout
+          checkout={activeCheckout}
+          onMarkReturned={() => handleMarkReturned(activeCheckout.id)}
+        />
+      )}
+
+      {isOwner && requests && requests.length > 0 && (
+        <ToolRequests
+          requests={requests}
+          onApprove={handleApproveRequest}
+          onReject={handleRejectRequest}
+          onMarkReturned={handleMarkReturned}
+          toolName={tool.name}
+        />
+      )}
+
+      {isOwner && <DangerZone onDelete={handleDeleteTool} />}
     </div>
   );
 };

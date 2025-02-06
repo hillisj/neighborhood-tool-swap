@@ -58,7 +58,7 @@ export const ToolCard = ({
     e.stopPropagation();
     
     if (requiresAuth) {
-      toast.error("Please sign in to request items");
+      toast.error("Please sign in to request tools");
       navigate('/auth');
       return;
     }
@@ -68,44 +68,44 @@ export const ToolCard = ({
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        toast.error("You must be logged in to request items");
+        toast.error("You must be logged in to request tools");
         navigate('/auth');
         return;
       }
 
       const { data: activeRequest } = await supabase
-        .from('item_requests')
+        .from('tool_requests')
         .select('status')
-        .eq('item_id', id)
+        .eq('tool_id', id)
         .eq('requester_id', user.id)
         .in('status', ['pending', 'approved'])
         .maybeSingle();
 
       if (activeRequest) {
         const message = activeRequest.status === 'pending'
-          ? "You already have a pending request for this item"
-          : "You currently have this item checked out";
+          ? "You already have a pending request for this tool"
+          : "You currently have this tool checked out";
         toast.error(message);
         return;
       }
 
       const { error } = await supabase
-        .from('item_requests')
+        .from('tool_requests')
         .insert({
-          item_id: id,
+          tool_id: id,
           requester_id: user.id,
           status: 'pending'
         });
 
       if (error) {
         if (error.message.includes('violates row-level security')) {
-          toast.error("You cannot request your own items");
+          toast.error("You cannot request your own tools");
         } else {
           throw error;
         }
       } else {
         toast.success("Request sent successfully");
-        queryClient.invalidateQueries({ queryKey: ['items'] });
+        queryClient.invalidateQueries({ queryKey: ['tools'] });
       }
     } catch (error: any) {
       toast.error(`Error: ${error.message}`);
@@ -115,7 +115,7 @@ export const ToolCard = ({
   };
 
   const handleCardClick = () => {
-    navigate(`/item/${id}`);
+    navigate(`/tool/${id}`);
   };
 
   return (

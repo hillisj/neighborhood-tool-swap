@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tables } from "@/integrations/supabase/types";
 
 interface CurrentCheckoutProps {
-  checkout: Tables<"item_requests"> & {
+  checkout: Tables<"tool_requests"> & {
     profiles: {
       username: string | null;
       email: string | null;

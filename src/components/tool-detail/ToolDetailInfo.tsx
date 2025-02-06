@@ -1,80 +1,98 @@
-import { Tables } from "@/integrations/supabase/types";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { Tables } from "@/integrations/supabase/types";
 import { EditToolDialog } from "./EditToolDialog";
 
 interface ToolDetailInfoProps {
-  tool: Tables<"items"> & {
+  tool: Tables<"tools"> & {
     profiles: {
       username: string | null;
       email: string | null;
     } | null;
   };
-  isOwner: boolean;
+  hasPendingRequests?: boolean;
+  isOwner?: boolean;
 }
 
-export const ToolDetailInfo = ({ tool, isOwner }: ToolDetailInfoProps) => {
+export const ToolDetailInfo = ({ tool, hasPendingRequests, isOwner }: ToolDetailInfoProps) => {
+  const getStatusBadge = (status: 'available' | 'requested' | 'checked_out', hasPending: boolean) => {
+    // Override status to 'requested' if there are pending requests
+    const displayStatus = hasPending ? 'requested' : status;
+    
+    const styles = {
+      available: "bg-green-100 text-green-800",
+      requested: "bg-yellow-100 text-yellow-800",
+      checked_out: "bg-gray-100 text-gray-800"
+    };
+    
+    const labels = {
+      available: "Available",
+      requested: "Requested",
+      checked_out: "Checked Out"
+    };
+
+    return (
+      <Badge className={styles[displayStatus]}>
+        {labels[displayStatus]}
+      </Badge>
+    );
+  };
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{tool.name}</h1>
-        {isOwner && <EditToolDialog tool={tool} />}
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-4">
+          <h1 className="text-2xl font-bold text-gray-900">{tool.name}</h1>
+          {isOwner && <EditToolDialog tool={tool} />}
+        </div>
+        {getStatusBadge(tool.status, hasPendingRequests || false)}
       </div>
 
-      <div className="grid gap-4">
-        <div className="flex items-center justify-between">
-          <span className="text-gray-500">Status</span>
-          <span className="capitalize">{tool.status}</span>
-        </div>
+      <p className="text-gray-600 mb-6">{tool.description}</p>
 
-        <div className="flex items-center justify-between">
-          <span className="text-gray-500">Description</span>
-          <span>{tool.description || "N/A"}</span>
-        </div>
-
+      <div className="space-y-4">
         {tool.brand && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-500">Brand</span>
-            <span>{tool.brand || "N/A"}</span>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">Brand</h3>
+            <p className="text-gray-900">{tool.brand}</p>
           </div>
         )}
 
         {tool.model && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-500">Model</span>
-            <span>{tool.model || "N/A"}</span>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">Model</h3>
+            <p className="text-gray-900">{tool.model}</p>
           </div>
         )}
 
         {tool.condition && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-500">Condition</span>
-            <span>{tool.condition || "N/A"}</span>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">Condition</h3>
+            <p className="text-gray-900">{tool.condition}</p>
           </div>
         )}
 
         {tool.purchase_date && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-500">Purchase Date</span>
-            <span>
-              {format(new Date(tool.purchase_date), "MMMM d, yyyy")}
-            </span>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">Purchase Date</h3>
+            <p className="text-gray-900">
+              {format(new Date(tool.purchase_date), 'PPP')}
+            </p>
           </div>
         )}
 
         {tool.maintenance_notes && (
-          <div className="flex items-center justify-between">
-            <span className="text-gray-500">Maintenance Notes</span>
-            <span>{tool.maintenance_notes || "N/A"}</span>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">Maintenance Notes</h3>
+            <p className="text-gray-900 whitespace-pre-line">{tool.maintenance_notes}</p>
           </div>
         )}
 
-        <div className="flex items-center justify-between">
-          <span className="text-gray-500">Owner</span>
-          <span>
-            {tool.profiles?.username ||
-              tool.profiles?.email?.split("@")[0] ||
-              "Anonymous"}
-          </span>
+        <div>
+          <h3 className="text-sm font-medium text-gray-500">Owner</h3>
+          <p className="text-gray-900">
+            {tool.profiles?.username || tool.profiles?.email?.split('@')[0] || 'Anonymous'}
+          </p>
         </div>
       </div>
     </div>

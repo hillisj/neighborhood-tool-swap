@@ -39,24 +39,27 @@ export const EditToolDialog = ({ tool }: EditToolDialogProps) => {
     try {
       let imageUrl = tool.image_url;
 
+      // Upload new image if one is selected
       if (image) {
         const fileExt = image.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
         const { error: uploadError, data } = await supabase.storage
-          .from('items')
+          .from('tools')
           .upload(fileName, image);
 
         if (uploadError) throw uploadError;
 
+        // Get the public URL
         const { data: { publicUrl } } = supabase.storage
-          .from('items')
+          .from('tools')
           .getPublicUrl(fileName);
         
         imageUrl = publicUrl;
       }
 
+      // Update tool details
       const { error } = await supabase
-        .from('items')
+        .from('tools')
         .update({
           name,
           description,
@@ -69,10 +72,11 @@ export const EditToolDialog = ({ tool }: EditToolDialogProps) => {
 
       toast({
         title: "Success!",
-        description: "Item details updated successfully.",
+        description: "Tool details updated successfully.",
       });
 
-      queryClient.invalidateQueries({ queryKey: ['item', tool.id] });
+      // Invalidate and refetch queries
+      queryClient.invalidateQueries({ queryKey: ['tool', tool.id] });
       setOpen(false);
     } catch (error: any) {
       toast({
@@ -95,12 +99,12 @@ export const EditToolDialog = ({ tool }: EditToolDialogProps) => {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Item</DialogTitle>
+          <DialogTitle>Edit Tool</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="name" className="text-sm font-medium">
-              Item Name
+              Tool Name
             </label>
             <Input
               id="name"
@@ -125,7 +129,7 @@ export const EditToolDialog = ({ tool }: EditToolDialogProps) => {
 
           <div className="space-y-2">
             <label htmlFor="image" className="text-sm font-medium">
-              Item Image
+              Tool Image
             </label>
             <Input
               id="image"

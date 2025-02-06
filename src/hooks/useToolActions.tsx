@@ -9,7 +9,7 @@ export const useToolActions = (id: string) => {
 
   const handleMarkReturned = async (checkoutId: string) => {
     const { error } = await supabase
-      .from('item_requests')
+      .from('tool_requests')
       .update({ 
         status: 'returned',
         return_date: new Date().toISOString()
@@ -17,22 +17,22 @@ export const useToolActions = (id: string) => {
       .eq('id', checkoutId);
 
     if (error) {
-      toast.error("Failed to mark item as returned");
+      toast.error("Failed to mark tool as returned");
       return;
     }
     
     queryClient.invalidateQueries({ queryKey: ['tool', id] });
-    queryClient.invalidateQueries({ queryKey: ['item-requests', id] });
+    queryClient.invalidateQueries({ queryKey: ['tool-requests', id] });
     queryClient.invalidateQueries({ queryKey: ['active-checkout', id] });
     
-    toast.success("Item marked as returned successfully");
+    toast.success("Tool marked as returned successfully");
   };
 
   const handleApproveRequest = async (requestId: string) => {
     const dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     
     const { error: approvalError } = await supabase
-      .from('item_requests')
+      .from('tool_requests')
       .update({ 
         status: 'approved',
         due_date: dueDate
@@ -45,7 +45,7 @@ export const useToolActions = (id: string) => {
     }
     
     queryClient.invalidateQueries({ queryKey: ['tool', id] });
-    queryClient.invalidateQueries({ queryKey: ['item-requests', id] });
+    queryClient.invalidateQueries({ queryKey: ['tool-requests', id] });
     queryClient.invalidateQueries({ queryKey: ['active-checkout', id] });
     
     toast.success("Request approved successfully");
@@ -53,7 +53,7 @@ export const useToolActions = (id: string) => {
 
   const handleRejectRequest = async (requestId: string) => {
     const { error } = await supabase
-      .from('item_requests')
+      .from('tool_requests')
       .update({ status: 'rejected' })
       .eq('id', requestId);
 
@@ -63,23 +63,23 @@ export const useToolActions = (id: string) => {
     }
     
     queryClient.invalidateQueries({ queryKey: ['tool', id] });
-    queryClient.invalidateQueries({ queryKey: ['item-requests', id] });
+    queryClient.invalidateQueries({ queryKey: ['tool-requests', id] });
     
     toast.success("Request rejected successfully");
   };
 
   const handleDeleteTool = async () => {
     const { error } = await supabase
-      .from('items')
+      .from('tools')
       .delete()
       .eq('id', id);
 
     if (error) {
-      toast.error("Failed to delete item");
+      toast.error("Failed to delete tool");
       return;
     }
     
-    toast.success("Item deleted successfully");
+    toast.success("Tool deleted successfully");
     navigate('/profile');
   };
 
