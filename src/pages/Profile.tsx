@@ -34,7 +34,7 @@ const Profile = () => {
     <div className="min-h-screen bg-gray-50 pb-20">
       <header className="bg-white shadow-sm py-4 px-4 sticky top-0 z-10">
         <div className="flex items-center justify-between max-w-md mx-auto">
-          <h1 className="text-xl font-semibold">Your Tools</h1>
+          <h1 className="text-xl font-semibold">Your Items</h1>
           <Link 
             to="/user-profile" 
             className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
@@ -58,8 +58,8 @@ const Profile = () => {
       <main className="container max-w-md mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="owned">Tools You Own</TabsTrigger>
-            <TabsTrigger value="borrowed">Borrowed Tools</TabsTrigger>
+            <TabsTrigger value="owned">Items You Own</TabsTrigger>
+            <TabsTrigger value="borrowed">Borrowed Items</TabsTrigger>
           </TabsList>
 
           <TabsContent value="owned" className="space-y-6">

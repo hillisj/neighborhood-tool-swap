@@ -74,7 +74,7 @@ export const OwnedTools = () => {
     <div className="space-y-6">
       {checkedOutTools.length === 0 && requestedTools.length === 0 && availableTools.length === 0 ? (
         <p className="text-center text-gray-500">
-          You haven't added any tools yet.
+          You haven't added any items yet.
         </p>
       ) : (
         <div className="space-y-8">
