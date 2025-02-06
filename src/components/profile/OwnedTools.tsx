@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ToolCard } from "@/components/ToolCard";
@@ -26,7 +27,6 @@ export const OwnedTools = () => {
 
       if (toolsError) throw toolsError;
 
-      // Process tools to include request status
       return tools.map(tool => ({
         ...tool,
         status: tool.tool_requests?.some(request => request.status === 'pending')
@@ -42,7 +42,6 @@ export const OwnedTools = () => {
     return <div className="text-center text-gray-500">Loading your tools...</div>;
   }
 
-  // Group tools by status
   const checkedOutTools = ownedTools?.filter(tool => tool.status === 'checked_out') || [];
   const requestedTools = ownedTools?.filter(tool => tool.status === 'requested') || [];
   const availableTools = ownedTools?.filter(tool => tool.status === 'available') || [];

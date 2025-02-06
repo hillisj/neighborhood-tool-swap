@@ -24,7 +24,7 @@ const ToolDetail = () => {
   const { requests } = useToolRequests(id!);
   const { activeCheckout } = useActiveCheckout(id!, tool?.status || '');
 
-  const hasPendingRequests = requests.some(request => request.status === 'pending');
+  const hasPendingRequests = requests?.some(request => request.status === 'pending');
   const isOwner = currentUser?.id === tool?.owner_id;
 
   if (loadingTool) {
@@ -54,10 +54,10 @@ const ToolDetail = () => {
         <ToolDetailHeader />
         <ToolContent
           tool={tool}
-          requests={requests}
+          requests={requests || []}
           activeCheckout={activeCheckout}
           isOwner={isOwner}
-          hasPendingRequests={hasPendingRequests}
+          hasPendingRequests={!!hasPendingRequests}
           requiresAuth={!currentUser}
         />
       </div>

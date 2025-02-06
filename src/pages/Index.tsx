@@ -102,13 +102,13 @@ const Index = () => {
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('profiles')
       .select('username, email, avatar_url')
       .eq('id', userId)
       .single();
     
-    if (!error && data) {
+    if (data) {
       setUserProfile(data);
     }
   };
