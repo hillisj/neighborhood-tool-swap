@@ -6,21 +6,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Database } from "@/integrations/supabase/types";
+import { EditToolFormFields } from "./EditToolFormFields";
+import { useToolImageUpload } from "./useToolImageUpload";
 
 type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
@@ -43,44 +36,15 @@ export const EditToolDialog = ({ tool }: EditToolDialogProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const categories: ToolCategory[] = [
-    'Kids',
-    'Music',
-    'Electronics',
-    'Exercise',
-    'Emergency',
-    'Household',
-    'Gardening',
-    'Tools'
-  ];
+  const { uploadImage } = useToolImageUpload();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      let imageUrl = tool.image_url;
+      const imageUrl = await uploadImage(image, tool.image_url);
 
-      // Upload new image if one is selected
-      if (image) {
-        const fileExt = image.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const { error: uploadError, data } = await supabase.storage
-          .from('tools')
-          .upload(fileName, image);
-
-        if (uploadError) throw uploadError;
-
-        // Get the public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('tools')
-          .getPublicUrl(fileName);
-        
-        imageUrl = publicUrl;
-      }
-
-      // Update tool details
       const { error } = await supabase
         .from('tools')
         .update({
@@ -99,7 +63,6 @@ export const EditToolDialog = ({ tool }: EditToolDialogProps) => {
         description: "Tool details updated successfully.",
       });
 
-      // Invalidate and refetch queries
       queryClient.invalidateQueries({ queryKey: ['tool', tool.id] });
       setOpen(false);
     } catch (error: any) {
@@ -126,68 +89,15 @@ export const EditToolDialog = ({ tool }: EditToolDialogProps) => {
           <DialogTitle>Edit Tool</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium">
-              Tool Name
-            </label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              minLength={2}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="category" className="text-sm font-medium">
-              Category
-            </label>
-            <Select
-              value={category}
-              onValueChange={(value: ToolCategory) => setCategory(value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-medium">
-              Description
-            </label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="min-h-[100px]"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="image" className="text-sm font-medium">
-              Tool Image
-            </label>
-            <Input
-              id="image"
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  setImage(e.target.files[0]);
-                }
-              }}
-              className="cursor-pointer"
-            />
-          </div>
+          <EditToolFormFields
+            name={name}
+            setName={setName}
+            description={description}
+            setDescription={setDescription}
+            category={category}
+            setCategory={setCategory}
+            setImage={setImage}
+          />
 
           <div className="flex justify-end space-x-2">
             <Button
