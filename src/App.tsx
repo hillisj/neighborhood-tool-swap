@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,10 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import AddTool from "./pages/AddTool";
+import AddItem from "./pages/AddItem";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
-import ToolDetail from "./pages/ToolDetail";
+import ItemDetail from "./pages/ItemDetail";
 
 const queryClient = new QueryClient();
 
@@ -50,12 +49,12 @@ const App = () => (
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/" element={<Index />} />
-          <Route path="/tool/:id" element={<ToolDetail />} />
+          <Route path="/item/:id" element={<ItemDetail />} />
           <Route
             path="/add"
             element={
               <ProtectedRoute>
-                <AddTool />
+                <AddItem />
               </ProtectedRoute>
             }
           />

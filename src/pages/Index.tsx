@@ -1,4 +1,4 @@
-import { ToolCard } from "@/components/ToolCard";
+import { ItemCard } from "@/components/ItemCard";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -8,19 +8,19 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-const fetchTools = async () => {
+const fetchItems = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   const currentUserId = user?.id;
 
   const { data, error } = await supabase
-    .from('tools')
+    .from('items')
     .select(`
       *,
       profiles:owner_id (
         username,
         email
       ),
-      tool_requests (
+      item_requests (
         status
       )
     `)
@@ -29,22 +29,22 @@ const fetchTools = async () => {
   if (error) throw error;
   
   // Process the data to include pending requests information
-  const processedTools = data.map(tool => ({
-    ...tool,
-    status: tool.tool_requests?.some(request => request.status === 'pending')
+  const processedItems = data.map(item => ({
+    ...item,
+    status: item.item_requests?.some(request => request.status === 'pending')
       ? 'requested'
-      : tool.status
+      : item.status
   }));
 
-  // Sort tools by status and ownership
+  // Sort items by status and ownership
   const statusOrder = {
     'available': 0,
     'requested': 1,
     'checked_out': 2
   };
 
-  return processedTools.sort((a, b) => {
-    // First, sort by ownership (other users' tools first)
+  return processedItems.sort((a, b) => {
+    // First, sort by ownership (other users' items first)
     if (a.owner_id === currentUserId && b.owner_id !== currentUserId) return 1;
     if (a.owner_id !== currentUserId && b.owner_id === currentUserId) return -1;
     
@@ -55,9 +55,9 @@ const fetchTools = async () => {
 };
 
 const Index = () => {
-  const { data: tools, isLoading } = useQuery({
-    queryKey: ['tools'],
-    queryFn: fetchTools,
+  const { data: items, isLoading } = useQuery({
+    queryKey: ['items'],
+    queryFn: fetchItems,
   });
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userProfile, setUserProfile] = useState<{ username?: string | null, email?: string | null, avatar_url?: string | null } | null>(null);
@@ -133,29 +133,29 @@ const Index = () => {
         {!isAuthenticated && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <p className="text-blue-700 text-sm">
-              Sign in to request tools, add your own tools, or manage your tool inventory.
+              Sign in to request items, add your own items, or manage your item inventory.
             </p>
           </div>
         )}
         {isLoading ? (
-          <div className="text-center text-gray-500">Loading tools...</div>
+          <div className="text-center text-gray-500">Loading items...</div>
         ) : (
           <div className="grid gap-6">
-            {tools?.map((tool) => (
-              <ToolCard
-                key={tool.id}
-                id={tool.id}
-                name={tool.name}
-                description={tool.description}
-                imageUrl={tool.image_url || "/placeholder.svg"}
-                owner={tool.profiles?.username || tool.profiles?.email?.split('@')[0] || 'Anonymous'}
-                status={tool.status}
+            {items?.map((item) => (
+              <ItemCard
+                key={item.id}
+                id={item.id}
+                name={item.name}
+                description={item.description}
+                imageUrl={item.image_url || "/placeholder.svg"}
+                owner={item.profiles?.username || item.profiles?.email?.split('@')[0] || 'Anonymous'}
+                status={item.status}
                 requiresAuth={!isAuthenticated}
               />
             ))}
-            {tools?.length === 0 && (
+            {items?.length === 0 && (
               <div className="text-center text-gray-500">
-                No available tools at the moment. {isAuthenticated ? 'Add one to share!' : 'Sign in to add tools!'}
+                No available items at the moment. {isAuthenticated ? 'Add one to share!' : 'Sign in to add items!'}
               </div>
             )}
           </div>
