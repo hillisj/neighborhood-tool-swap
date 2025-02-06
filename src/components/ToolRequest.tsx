@@ -13,7 +13,9 @@ interface ToolRequestProps {
   avatarUrl?: string;
   onApprove?: () => void;
   onReject?: () => void;
+  createdAt?: string;
   updatedAt?: string;
+  returnDate?: string;
   showActions?: boolean;
   showRequester?: boolean;
 }
@@ -25,7 +27,9 @@ export const ToolRequest = ({
   avatarUrl,
   onApprove,
   onReject,
+  createdAt,
   updatedAt,
+  returnDate,
   showActions = true,
   showRequester = true,
 }: ToolRequestProps) => {
@@ -43,14 +47,29 @@ export const ToolRequest = ({
             {showRequester && (
               <p className="text-sm text-gray-600">Requested by: {requesterName}</p>
             )}
+            {createdAt && (
+              <p className="text-sm text-gray-600">
+                Requested at: {format(new Date(createdAt), "MMM d, yyyy")}
+              </p>
+            )}
             {dueDate && (
               <p className="text-sm text-gray-600">
                 Due: {format(new Date(dueDate), "MMM d, yyyy")}
               </p>
             )}
+            {status === 'approved' && updatedAt && (
+              <p className="text-sm text-gray-600">
+                Checked out: {format(new Date(updatedAt), "MMM d, yyyy")}
+              </p>
+            )}
+            {returnDate && (
+              <p className="text-sm text-gray-600">
+                Returned: {format(new Date(returnDate), "MMM d, yyyy")}
+              </p>
+            )}
             <div className="flex items-center gap-2 mt-1">
               <RequestStatus status={status} />
-              {status !== 'pending' && updatedAt && (
+              {status !== 'pending' && updatedAt && !returnDate && (
                 <p className="text-sm text-gray-500">
                   on {format(new Date(updatedAt), "MMM d, yyyy")}
                 </p>

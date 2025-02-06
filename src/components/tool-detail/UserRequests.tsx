@@ -25,7 +25,9 @@ export const UserRequests = ({ requests, toolName }: UserRequestsProps) => {
             status={request.status}
             dueDate={request.due_date}
             avatarUrl={request.profiles?.avatar_url}
+            createdAt={request.created_at}
             updatedAt={request.updated_at}
+            returnDate={request.return_date}
             showActions={false}
             showRequester={false}
           />
