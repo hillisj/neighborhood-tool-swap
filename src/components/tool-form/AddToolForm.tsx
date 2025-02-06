@@ -1,29 +1,22 @@
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Database } from "@/integrations/supabase/types";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CategorySelect } from "@/components/shared/CategorySelect";
+import { EditToolFormFields } from "@/components/tool-detail/EditToolFormFields";
 
 type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
 export const AddToolForm = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<ToolCategory>("Tools");
+  const [categories, setCategories] = useState<ToolCategory[]>(["Tools"]);
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,16 +44,32 @@ export const AddToolForm = () => {
         imageUrl = publicUrl;
       }
 
-      const { error } = await supabase.from('tools').insert({
-        name,
-        description,
-        image_url: imageUrl,
-        owner_id: user.id,
-        category,
-        status: 'available'
-      });
+      // First insert the tool
+      const { data: tool, error: toolError } = await supabase
+        .from('tools')
+        .insert({
+          name,
+          description,
+          image_url: imageUrl,
+          owner_id: user.id,
+          status: 'available'
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (toolError) throw toolError;
+
+      // Then insert the categories
+      const { error: categoriesError } = await supabase
+        .from('tool_categories')
+        .insert(
+          categories.map(category => ({
+            tool_id: tool.id,
+            category
+          }))
+        );
+
+      if (categoriesError) throw categoriesError;
 
       toast({
         title: "Success!",
@@ -81,54 +90,15 @@ export const AddToolForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <label htmlFor="name" className="text-sm font-medium">
-          Item Name
-        </label>
-        <Input
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          minLength={2}
-          placeholder="e.g., Camping Tent"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Category</label>
-        <CategorySelect
-          selectedCategory={category}
-          onCategoryChange={setCategory}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label htmlFor="description" className="text-sm font-medium">
-          Description
-        </label>
-        <Textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          placeholder="Describe your item..."
-          className="min-h-[100px]"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label htmlFor="image" className="text-sm font-medium">
-          Item Image
-        </label>
-        <Input
-          id="image"
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="cursor-pointer"
-        />
-      </div>
+      <EditToolFormFields
+        name={name}
+        setName={setName}
+        description={description}
+        setDescription={setDescription}
+        categories={categories}
+        setCategories={setCategories}
+        setImage={setImage}
+      />
 
       <Button
         type="submit"

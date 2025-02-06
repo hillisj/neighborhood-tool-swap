@@ -11,8 +11,8 @@ interface EditToolFormFieldsProps {
   setName: (name: string) => void;
   description: string;
   setDescription: (description: string) => void;
-  category: ToolCategory;
-  setCategory: (category: ToolCategory) => void;
+  categories: ToolCategory[];
+  setCategories: (categories: ToolCategory[]) => void;
   setImage: (file: File | null) => void;
 }
 
@@ -21,8 +21,8 @@ export const EditToolFormFields = ({
   setName,
   description,
   setDescription,
-  category,
-  setCategory,
+  categories,
+  setCategories,
   setImage,
 }: EditToolFormFieldsProps) => {
   return (
@@ -43,10 +43,10 @@ export const EditToolFormFields = ({
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Category</label>
+        <label className="text-sm font-medium">Categories (select multiple)</label>
         <CategorySelect
-          selectedCategory={category}
-          onCategoryChange={setCategory}
+          selectedCategories={categories}
+          onCategoryChange={setCategories}
         />
       </div>
 

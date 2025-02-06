@@ -36,6 +36,29 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_categories: {
+        Row: {
+          category: Database["public"]["Enums"]["tool_category"]
+          tool_id: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["tool_category"]
+          tool_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["tool_category"]
+          tool_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_categories_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tool_requests: {
         Row: {
           created_at: string | null
@@ -87,7 +110,6 @@ export type Database = {
       tools: {
         Row: {
           brand: string | null
-          category: Database["public"]["Enums"]["tool_category"]
           condition: string | null
           created_at: string | null
           description: string | null
@@ -103,7 +125,6 @@ export type Database = {
         }
         Insert: {
           brand?: string | null
-          category: Database["public"]["Enums"]["tool_category"]
           condition?: string | null
           created_at?: string | null
           description?: string | null
@@ -119,7 +140,6 @@ export type Database = {
         }
         Update: {
           brand?: string | null
-          category?: Database["public"]["Enums"]["tool_category"]
           condition?: string | null
           created_at?: string | null
           description?: string | null

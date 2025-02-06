@@ -21,14 +21,22 @@ const CATEGORIES: ToolCategory[] = [
 ];
 
 interface CategorySelectProps {
-  selectedCategory: ToolCategory;
-  onCategoryChange: (category: ToolCategory) => void;
+  selectedCategories: ToolCategory[];
+  onCategoryChange: (categories: ToolCategory[]) => void;
 }
 
 export const CategorySelect = ({
-  selectedCategory,
+  selectedCategories,
   onCategoryChange,
 }: CategorySelectProps) => {
+  const toggleCategory = (category: ToolCategory) => {
+    if (selectedCategories.includes(category)) {
+      onCategoryChange(selectedCategories.filter(c => c !== category));
+    } else {
+      onCategoryChange([...selectedCategories, category]);
+    }
+  };
+
   return (
     <div className="flex flex-wrap gap-2">
       {CATEGORIES.map((category) => (
@@ -37,9 +45,9 @@ export const CategorySelect = ({
           variant="secondary"
           className={cn(
             "cursor-pointer",
-            selectedCategory === category ? "bg-accent hover:bg-accent/80" : ""
+            selectedCategories.includes(category) ? "bg-accent hover:bg-accent/80" : ""
           )}
-          onClick={() => onCategoryChange(category)}
+          onClick={() => toggleCategory(category)}
         >
           {category}
         </Badge>
