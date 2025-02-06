@@ -49,11 +49,23 @@ export const ToolRequest = ({
             {showRequester && (
               <p className="text-base text-gray-600">Requested by: {requesterName}</p>
             )}
-            {createdAt && (
-              <p className="text-base text-gray-600">
-                <span className="font-bold">Requested:</span> {format(new Date(createdAt), "MMM d, yyyy")}
-              </p>
-            )}
+            <div className="flex items-center justify-between gap-2">
+              {createdAt && (
+                <p className="text-base text-gray-600">
+                  <span className="font-bold">Requested:</span> {format(new Date(createdAt), "MMM d, yyyy")}
+                </p>
+              )}
+              {showActions && status === "pending" && onCancel && (
+                <Button
+                  onClick={onCancel}
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 -mr-2"
+                >
+                  <XCircle className="w-5 h-5" />
+                </Button>
+              )}
+            </div>
             {status === 'approved' && updatedAt && (
               <p className="text-base text-gray-600">
                 <span className="font-bold">Checked out:</span> {format(new Date(updatedAt), "MMM d, yyyy")}
@@ -73,41 +85,26 @@ export const ToolRequest = ({
         </div>
       </div>
       
-      {showActions && status === "pending" && (
+      {showActions && status === "pending" && onApprove && onReject && (
         <div className="flex gap-2 mt-4">
-          {onApprove && onReject && (
-            <>
-              <Button
-                onClick={onApprove}
-                className="flex items-center gap-1"
-                variant="default"
-                size="sm"
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                Approve
-              </Button>
-              <Button
-                onClick={onReject}
-                className="flex items-center gap-1"
-                variant="destructive"
-                size="sm"
-              >
-                <XCircle className="w-4 h-4" />
-                Reject
-              </Button>
-            </>
-          )}
-          {onCancel && (
-            <Button
-              onClick={onCancel}
-              className="flex items-center gap-1"
-              variant="destructive"
-              size="sm"
-            >
-              <XCircle className="w-4 h-4" />
-              Cancel Request
-            </Button>
-          )}
+          <Button
+            onClick={onApprove}
+            className="flex items-center gap-1"
+            variant="default"
+            size="sm"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            Approve
+          </Button>
+          <Button
+            onClick={onReject}
+            className="flex items-center gap-1"
+            variant="destructive"
+            size="sm"
+          >
+            <XCircle className="w-4 h-4" />
+            Reject
+          </Button>
         </div>
       )}
     </Card>
