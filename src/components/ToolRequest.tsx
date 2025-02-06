@@ -46,7 +46,7 @@ export const ToolRequest = ({
           )}
           <div>
             {showRequester && (
-              <h4 className="text-sm font-semibold text-gray-900 mb-1">Requested by: {requesterName}</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-1">Requested by: {requesterName}</h4>
             )}
             {createdAt && (
               <p className="text-base text-gray-600">
