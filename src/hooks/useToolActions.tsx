@@ -68,6 +68,23 @@ export const useToolActions = (id: string) => {
     toast.success("Request rejected successfully");
   };
 
+  const handleCancelRequest = async (requestId: string) => {
+    const { error } = await supabase
+      .from('tool_requests')
+      .delete()
+      .eq('id', requestId);
+
+    if (error) {
+      toast.error("Failed to cancel request");
+      return;
+    }
+    
+    queryClient.invalidateQueries({ queryKey: ['tool', id] });
+    queryClient.invalidateQueries({ queryKey: ['tool-requests', id] });
+    
+    toast.success("Request cancelled successfully");
+  };
+
   const handleDeleteTool = async () => {
     // First delete any associated requests
     const { error: requestsError } = await supabase
@@ -104,6 +121,7 @@ export const useToolActions = (id: string) => {
     handleMarkReturned,
     handleApproveRequest,
     handleRejectRequest,
+    handleCancelRequest,
     handleDeleteTool,
   };
 };

@@ -13,6 +13,7 @@ interface ToolRequestProps {
   avatarUrl?: string;
   onApprove?: () => void;
   onReject?: () => void;
+  onCancel?: () => void;
   createdAt?: string;
   updatedAt?: string;
   returnDate?: string;
@@ -27,6 +28,7 @@ export const ToolRequest = ({
   avatarUrl,
   onApprove,
   onReject,
+  onCancel,
   createdAt,
   updatedAt,
   returnDate,
@@ -73,24 +75,39 @@ export const ToolRequest = ({
       
       {showActions && status === "pending" && (
         <div className="flex gap-2 mt-4">
-          <Button
-            onClick={onApprove}
-            className="flex items-center gap-1"
-            variant="default"
-            size="sm"
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            Approve
-          </Button>
-          <Button
-            onClick={onReject}
-            className="flex items-center gap-1"
-            variant="destructive"
-            size="sm"
-          >
-            <XCircle className="w-4 h-4" />
-            Reject
-          </Button>
+          {onApprove && onReject && (
+            <>
+              <Button
+                onClick={onApprove}
+                className="flex items-center gap-1"
+                variant="default"
+                size="sm"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                Approve
+              </Button>
+              <Button
+                onClick={onReject}
+                className="flex items-center gap-1"
+                variant="destructive"
+                size="sm"
+              >
+                <XCircle className="w-4 h-4" />
+                Reject
+              </Button>
+            </>
+          )}
+          {onCancel && (
+            <Button
+              onClick={onCancel}
+              className="flex items-center gap-1"
+              variant="destructive"
+              size="sm"
+            >
+              <XCircle className="w-4 h-4" />
+              Cancel Request
+            </Button>
+          )}
         </div>
       )}
     </Card>
