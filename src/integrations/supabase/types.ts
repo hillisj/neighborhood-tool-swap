@@ -161,6 +161,8 @@ export type Database = {
         | "Household"
         | "Gardening"
         | "Tools"
+        | "Kitchen"
+        | "Other"
       tool_status: "available" | "requested" | "checked_out"
     }
     CompositeTypes: {

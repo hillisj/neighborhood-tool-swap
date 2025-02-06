@@ -38,7 +38,9 @@ export const EditToolFormFields = ({
     'Emergency',
     'Household',
     'Gardening',
-    'Tools'
+    'Tools',
+    'Kitchen',
+    'Other'
   ];
 
   return (
