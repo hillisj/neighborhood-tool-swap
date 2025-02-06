@@ -1,6 +1,7 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { CurrentCheckout } from "./CurrentCheckout";
-import { ToolRequests } from "./ToolRequests";
+import { OwnerRequests } from "./OwnerRequests";
 import { DangerZone } from "./DangerZone";
 
 interface OwnerActionsProps {
@@ -44,7 +45,7 @@ export const OwnerActions = ({
       )}
 
       {requests && requests.length > 0 && (
-        <ToolRequests
+        <OwnerRequests
           requests={requests}
           onApprove={onApproveRequest}
           onReject={onRejectRequest}

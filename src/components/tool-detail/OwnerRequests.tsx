@@ -1,7 +1,8 @@
+
 import { ToolRequest } from "@/components/ToolRequest";
 import { Tables } from "@/integrations/supabase/types";
 
-interface ToolRequestsProps {
+interface OwnerRequestsProps {
   requests: (Tables<"tool_requests"> & {
     profiles: {
       username: string | null;
@@ -15,12 +16,12 @@ interface ToolRequestsProps {
   toolName: string;
 }
 
-export const ToolRequests = ({ 
+export const OwnerRequests = ({ 
   requests, 
   onApprove, 
   onReject,
   toolName 
-}: ToolRequestsProps) => {
+}: OwnerRequestsProps) => {
   return (
     <div className="p-6 border-t">
       <h2 className="text-lg font-semibold mb-4">Tool Requests</h2>

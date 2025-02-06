@@ -1,9 +1,10 @@
+
 import { Tables } from "@/integrations/supabase/types";
 import { useToolActions } from "@/hooks/useToolActions";
 import { RequestToolButton } from "./RequestToolButton";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { UserRequests } from "./UserRequests";
+import { BorrowerRequests } from "./BorrowerRequests";
 import { ToolHeader } from "./ToolHeader";
 import { OwnerActions } from "./OwnerActions";
 
@@ -84,7 +85,7 @@ export const ToolContent = ({
       )}
 
       {!isOwner && userRequests.length > 0 && (
-        <UserRequests requests={userRequests} toolName={tool.name} />
+        <BorrowerRequests requests={userRequests} toolName={tool.name} />
       )}
 
       {isOwner && (

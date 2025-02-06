@@ -2,7 +2,7 @@
 import { ToolRequest } from "@/components/ToolRequest";
 import { Tables } from "@/integrations/supabase/types";
 
-interface UserRequestsProps {
+interface BorrowerRequestsProps {
   requests: (Tables<"tool_requests"> & {
     profiles: {
       username: string | null;
@@ -13,7 +13,7 @@ interface UserRequestsProps {
   toolName: string;
 }
 
-export const UserRequests = ({ requests, toolName }: UserRequestsProps) => {
+export const BorrowerRequests = ({ requests, toolName }: BorrowerRequestsProps) => {
   return (
     <div className="p-6 border-t">
       <h2 className="text-lg font-semibold mb-4">Your Requests</h2>
