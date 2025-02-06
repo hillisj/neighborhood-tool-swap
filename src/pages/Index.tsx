@@ -16,6 +16,23 @@ interface Profile {
   avatar_url?: string | null;
 }
 
+interface Tool {
+  id: string;
+  name: string;
+  description: string;
+  image_url: string;
+  status: 'available' | 'requested' | 'checked_out';
+  categories: ToolCategory[];
+  profiles: {
+    username: string | null;
+    phone_number: string | null;
+  };
+  owner_id: string;
+  tool_requests?: {
+    status: string;
+  }[];
+}
+
 const fetchTools = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   const currentUserId = user?.id;
