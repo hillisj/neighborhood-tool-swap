@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,6 +31,34 @@ const Profile = () => {
     },
   });
 
+  const { data: lendingCount } = useQuery({
+    queryKey: ['lending-count'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .rpc('get_user_lending_count', { user_id: user.id });
+
+      if (error) throw error;
+      return data || 0;
+    },
+  });
+
+  const { data: borrowingCount } = useQuery({
+    queryKey: ['borrowing-count'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .rpc('get_user_borrowing_count', { user_id: user.id });
+
+      if (error) throw error;
+      return data || 0;
+    },
+  });
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <header className="bg-white shadow-sm py-4 px-4 sticky top-0 z-10">
@@ -56,6 +85,17 @@ const Profile = () => {
       </header>
 
       <main className="container max-w-md mx-auto px-4 py-6">
+        <div className="mb-6 grid grid-cols-2 gap-4 bg-white p-4 rounded-lg shadow-sm">
+          <div className="text-center">
+            <div className="text-2xl font-semibold text-blue-600">{lendingCount}</div>
+            <div className="text-sm text-gray-600">Times Lent</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-semibold text-green-600">{borrowingCount}</div>
+            <div className="text-sm text-gray-600">Times Borrowed</div>
+          </div>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="owned">Items You Own</TabsTrigger>

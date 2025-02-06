@@ -148,7 +148,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_borrowing_count: {
+        Args: {
+          user_id: string
+        }
+        Returns: number
+      }
+      get_user_lending_count: {
+        Args: {
+          user_id: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       request_status: "pending" | "approved" | "rejected" | "returned"
