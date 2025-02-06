@@ -10,27 +10,27 @@ export const CheckedOutTools = () => {
       if (!user) throw new Error("Not authenticated");
 
       const { data, error } = await supabase
-        .from('tools')
+        .from('items')
         .select(`
           *,
           profiles:owner_id (
             username,
             email
           ),
-          tool_requests!inner (
+          item_requests!inner (
             status,
             id
           )
         `)
-        .eq('tool_requests.requester_id', user.id)
-        .eq('tool_requests.status', 'approved');
+        .eq('item_requests.requester_id', user.id)
+        .eq('item_requests.status', 'approved');
 
       if (error) throw error;
-      return data.map(tool => ({
-        ...tool,
-        status: tool.tool_requests?.some(request => request.status === 'pending')
+      return data.map(item => ({
+        ...item,
+        status: item.item_requests?.some(request => request.status === 'pending')
           ? 'requested' as const
-          : tool.tool_requests?.some(request => request.status === 'approved')
+          : item.item_requests?.some(request => request.status === 'approved')
             ? 'checked_out' as const
             : 'available' as const
       }));
@@ -44,27 +44,27 @@ export const CheckedOutTools = () => {
       if (!user) throw new Error("Not authenticated");
 
       const { data, error } = await supabase
-        .from('tools')
+        .from('items')
         .select(`
           *,
           profiles:owner_id (
             username,
             email
           ),
-          tool_requests!inner (
+          item_requests!inner (
             status,
             id
           )
         `)
-        .eq('tool_requests.requester_id', user.id)
-        .eq('tool_requests.status', 'pending');
+        .eq('item_requests.requester_id', user.id)
+        .eq('item_requests.status', 'pending');
 
       if (error) throw error;
-      return data.map(tool => ({
-        ...tool,
-        status: tool.tool_requests?.some(request => request.status === 'pending')
+      return data.map(item => ({
+        ...item,
+        status: item.item_requests?.some(request => request.status === 'pending')
           ? 'requested' as const
-          : tool.tool_requests?.some(request => request.status === 'approved')
+          : item.item_requests?.some(request => request.status === 'approved')
             ? 'checked_out' as const
             : 'available' as const
       }));
