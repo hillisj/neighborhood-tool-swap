@@ -14,6 +14,8 @@ interface ToolRequestProps {
   onApprove?: () => void;
   onReject?: () => void;
   updatedAt?: string;
+  showActions?: boolean;
+  showRequester?: boolean;
 }
 
 export const ToolRequest = ({
@@ -24,17 +26,23 @@ export const ToolRequest = ({
   onApprove,
   onReject,
   updatedAt,
+  showActions = true,
+  showRequester = true,
 }: ToolRequestProps) => {
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={avatarUrl} />
-            <AvatarFallback>{requesterName[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
+          {showRequester && (
+            <Avatar>
+              <AvatarImage src={avatarUrl} />
+              <AvatarFallback>{requesterName[0]?.toUpperCase()}</AvatarFallback>
+            </Avatar>
+          )}
           <div>
-            <p className="text-sm text-gray-600">Requested by: {requesterName}</p>
+            {showRequester && (
+              <p className="text-sm text-gray-600">Requested by: {requesterName}</p>
+            )}
             {dueDate && (
               <p className="text-sm text-gray-600">
                 Due: {format(new Date(dueDate), "MMM d, yyyy")}
@@ -52,7 +60,7 @@ export const ToolRequest = ({
         </div>
       </div>
       
-      {status === "pending" && (
+      {showActions && status === "pending" && (
         <div className="flex gap-2 mt-4">
           <Button
             onClick={onApprove}
