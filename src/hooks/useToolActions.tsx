@@ -69,18 +69,57 @@ export const useToolActions = (id: string) => {
   };
 
   const handleCancelRequest = async (requestId: string) => {
-    const { error } = await supabase
+    // First get the tool request to check if it's the only pending request
+    const { data: request, error: requestError } = await supabase
+      .from('tool_requests')
+      .select('tool_id')
+      .eq('id', requestId)
+      .single();
+
+    if (requestError) {
+      toast.error("Failed to fetch request details");
+      return;
+    }
+
+    // Get all pending requests for this tool
+    const { data: pendingRequests, error: pendingError } = await supabase
+      .from('tool_requests')
+      .select('id')
+      .eq('tool_id', request.tool_id)
+      .eq('status', 'pending');
+
+    if (pendingError) {
+      toast.error("Failed to check pending requests");
+      return;
+    }
+
+    // If this is the only pending request, update the tool status to available
+    if (pendingRequests.length === 1) {
+      const { error: toolError } = await supabase
+        .from('tools')
+        .update({ status: 'available' })
+        .eq('id', request.tool_id);
+
+      if (toolError) {
+        toast.error("Failed to update tool status");
+        return;
+      }
+    }
+
+    // Delete the request
+    const { error: deleteError } = await supabase
       .from('tool_requests')
       .delete()
       .eq('id', requestId);
 
-    if (error) {
+    if (deleteError) {
       toast.error("Failed to cancel request");
       return;
     }
     
     queryClient.invalidateQueries({ queryKey: ['tool', id] });
     queryClient.invalidateQueries({ queryKey: ['tool-requests', id] });
+    queryClient.invalidateQueries({ queryKey: ['tools'] });
     
     toast.success("Request cancelled successfully");
   };
