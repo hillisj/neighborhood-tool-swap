@@ -37,9 +37,12 @@ export const OwnerRequests = ({
             onApprove={() => onApprove(request.id)}
             onReject={() => onReject(request.id)}
             updatedAt={request.updated_at}
+            createdAt={request.created_at}
+            returnDate={request.return_date}
           />
         ))}
       </div>
     </div>
   );
 };
+
