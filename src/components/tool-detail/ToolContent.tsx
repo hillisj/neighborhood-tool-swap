@@ -8,6 +8,7 @@ import { RequestToolButton } from "./RequestToolButton";
 import { DangerZone } from "./DangerZone";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { UserRequests } from "./UserRequests";
 
 interface ToolContentProps {
   tool: Tables<"tools"> & {
@@ -64,6 +65,11 @@ export const ToolContent = ({
     request => request.requester_id === currentUser.id && request.status === 'pending'
   );
 
+  // Filter requests for the current user
+  const userRequests = currentUser 
+    ? requests.filter(request => request.requester_id === currentUser.id)
+    : [];
+
   // Only show the request button if:
   // 1. User is not the owner
   // 2. Tool is available
@@ -92,6 +98,10 @@ export const ToolContent = ({
           toolId={tool.id}
           requiresAuth={requiresAuth}
         />
+      )}
+
+      {!isOwner && userRequests.length > 0 && (
+        <UserRequests requests={userRequests} toolName={tool.name} />
       )}
 
       {isOwner && tool.status === 'checked_out' && activeCheckout && (
