@@ -77,7 +77,7 @@ const ToolDetail = () => {
         <ToolContent
           tool={tool}
           requests={requests}
-          activeCheckout={activeCheckout as RequestWithProfile}
+          activeCheckout={activeCheckout as unknown as RequestWithProfile}
           isOwner={isOwner}
           hasPendingRequests={hasPendingRequests}
           requiresAuth={!currentUser}
