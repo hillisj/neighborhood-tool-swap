@@ -14,12 +14,6 @@ import { Tables } from "@/integrations/supabase/types";
 
 type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
-export interface ProfileData {
-  username: string | null;
-  phone_number: string | null;
-  avatar_url?: string | null;
-}
-
 interface ToolWithProfile extends Tables<"tools"> {
   profiles: {
     username: string | null;
@@ -79,9 +73,9 @@ const ToolDetail = () => {
       <div className="max-w-2xl mx-auto p-4">
         <ToolDetailHeader />
         <ToolContent
-          tool={tool}
-          requests={requests}
-          activeCheckout={activeCheckout}
+          tool={tool as ToolWithProfile}
+          requests={requests as RequestWithProfile[]}
+          activeCheckout={activeCheckout as RequestWithProfile}
           isOwner={isOwner}
           hasPendingRequests={hasPendingRequests}
           requiresAuth={!currentUser}
