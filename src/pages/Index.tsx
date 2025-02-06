@@ -14,7 +14,7 @@ const fetchTools = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   const currentUserId = user?.id;
 
-  const { data, error } = await supabase
+  const { data: tools, error: toolsError } = await supabase
     .from('tools')
     .select(`
       *,
@@ -28,10 +28,27 @@ const fetchTools = async () => {
     `)
     .order('created_at', { ascending: false });
 
-  if (error) throw error;
+  if (toolsError) throw toolsError;
+
+  // Fetch categories for all tools
+  const { data: categories, error: categoriesError } = await supabase
+    .from('tool_categories')
+    .select('tool_id, category');
+
+  if (categoriesError) throw categoriesError;
+
+  // Create a map of tool_id to categories
+  const toolCategories = categories.reduce((acc: { [key: string]: ToolCategory[] }, curr) => {
+    if (!acc[curr.tool_id]) {
+      acc[curr.tool_id] = [];
+    }
+    acc[curr.tool_id].push(curr.category);
+    return acc;
+  }, {});
   
-  const processedTools = data.map(tool => ({
+  const processedTools = tools.map(tool => ({
     ...tool,
+    categories: toolCategories[tool.id] || [],
     status: tool.tool_requests?.some(request => request.status === 'pending')
       ? 'requested'
       : tool.status
@@ -97,7 +114,9 @@ const Index = () => {
   };
 
   const filteredTools = tools?.filter(tool => {
-    const matchesCategory = selectedCategory ? tool.category === selectedCategory : true;
+    const matchesCategory = selectedCategory 
+      ? tool.categories.includes(selectedCategory)
+      : true;
     const matchesSearch = searchQuery.trim() === '' ? true : 
       tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tool.description?.toLowerCase().includes(searchQuery.toLowerCase());

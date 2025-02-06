@@ -1,6 +1,12 @@
+
 import { format } from "date-fns";
 import { Tables } from "@/integrations/supabase/types";
 import { EditToolDialog } from "./EditToolDialog";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
+
+type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
 interface ToolDetailInfoProps {
   tool: Tables<"tools"> & {
@@ -14,6 +20,19 @@ interface ToolDetailInfoProps {
 }
 
 export const ToolDetailInfo = ({ tool, isOwner }: ToolDetailInfoProps) => {
+  const { data: categories = [] } = useQuery({
+    queryKey: ['tool-categories', tool.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('tool_categories')
+        .select('category')
+        .eq('tool_id', tool.id);
+      
+      if (error) throw error;
+      return data.map(tc => tc.category);
+    },
+  });
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
@@ -27,8 +46,8 @@ export const ToolDetailInfo = ({ tool, isOwner }: ToolDetailInfoProps) => {
 
       <div className="space-y-4">
         <div>
-          <h3 className="text-sm font-medium text-gray-500">Category</h3>
-          <p className="text-gray-900">{tool.category}</p>
+          <h3 className="text-sm font-medium text-gray-500">Categories</h3>
+          <p className="text-gray-900">{categories.join(', ')}</p>
         </div>
 
         {tool.brand && (
