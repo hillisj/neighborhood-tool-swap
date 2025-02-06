@@ -1,3 +1,4 @@
+
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -40,7 +41,11 @@ export const useToolActions = (id: string) => {
       .eq('id', requestId);
 
     if (approvalError) {
-      toast.error("Failed to approve request");
+      if (approvalError.message.includes('Tool is already checked out')) {
+        toast.error("Cannot approve: Tool is currently checked out");
+      } else {
+        toast.error("Failed to approve request");
+      }
       return;
     }
     
