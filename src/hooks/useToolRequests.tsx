@@ -1,6 +1,15 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
+
+interface RequestWithProfile extends Tables<"tool_requests"> {
+  profiles: {
+    username: string | null;
+    phone_number: string | null;
+    avatar_url: string | null;
+  } | null;
+}
 
 export const useToolRequests = (id: string) => {
   const { data: requests = [], isLoading: loadingRequests } = useQuery({
@@ -20,7 +29,7 @@ export const useToolRequests = (id: string) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as RequestWithProfile[];
     },
   });
 
