@@ -31,7 +31,7 @@ export const ToolImage = ({ imageUrl, name, status }: ToolImageProps) => {
   };
 
   return (
-    <div className="aspect-video relative overflow-hidden bg-gray-100">
+    <div className="aspect-square relative overflow-hidden bg-gray-100">
       <img
         src={imageUrl}
         alt={name}
