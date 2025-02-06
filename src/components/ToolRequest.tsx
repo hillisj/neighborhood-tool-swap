@@ -52,14 +52,14 @@ export const ToolRequest = ({
                 <span className="font-bold">Requested:</span> {format(new Date(createdAt), "MMM d, yyyy")}
               </p>
             )}
-            {dueDate && (
-              <p className="text-base text-gray-600">
-                <span className="font-bold">Due:</span> {format(new Date(dueDate), "MMM d, yyyy")}
-              </p>
-            )}
             {status === 'approved' && updatedAt && (
               <p className="text-base text-gray-600">
                 <span className="font-bold">Checked out:</span> {format(new Date(updatedAt), "MMM d, yyyy")}
+              </p>
+            )}
+            {dueDate && (
+              <p className="text-base text-gray-600">
+                <span className="font-bold">Due:</span> {format(new Date(dueDate), "MMM d, yyyy")}
               </p>
             )}
             {returnDate && (
