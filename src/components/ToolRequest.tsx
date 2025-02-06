@@ -13,7 +13,6 @@ interface ToolRequestProps {
   avatarUrl?: string;
   onApprove?: () => void;
   onReject?: () => void;
-  onCancel?: () => void;
   createdAt?: string;
   updatedAt?: string;
   returnDate?: string;
@@ -28,7 +27,6 @@ export const ToolRequest = ({
   avatarUrl,
   onApprove,
   onReject,
-  onCancel,
   createdAt,
   updatedAt,
   returnDate,
@@ -49,23 +47,11 @@ export const ToolRequest = ({
             {showRequester && (
               <p className="text-base text-gray-600">Requested by: {requesterName}</p>
             )}
-            <div className="flex items-center justify-between gap-2">
-              {createdAt && (
-                <p className="text-base text-gray-600">
-                  <span className="font-bold">Requested:</span> {format(new Date(createdAt), "MMM d, yyyy")}
-                </p>
-              )}
-              {showActions && status === "pending" && onCancel && (
-                <Button
-                  onClick={onCancel}
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10 -mr-2"
-                >
-                  <XCircle className="w-5 h-5" />
-                </Button>
-              )}
-            </div>
+            {createdAt && (
+              <p className="text-base text-gray-600">
+                <span className="font-bold">Requested:</span> {format(new Date(createdAt), "MMM d, yyyy")}
+              </p>
+            )}
             {status === 'approved' && updatedAt && (
               <p className="text-base text-gray-600">
                 <span className="font-bold">Checked out:</span> {format(new Date(updatedAt), "MMM d, yyyy")}
@@ -85,7 +71,7 @@ export const ToolRequest = ({
         </div>
       </div>
       
-      {showActions && status === "pending" && onApprove && onReject && (
+      {showActions && status === "pending" && (
         <div className="flex gap-2 mt-4">
           <Button
             onClick={onApprove}
