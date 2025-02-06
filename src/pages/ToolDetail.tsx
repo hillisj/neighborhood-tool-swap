@@ -18,6 +18,7 @@ interface ToolWithProfile extends Tables<"tools"> {
   profiles: {
     username: string | null;
     phone_number: string | null;
+    email: string | null;
   } | null;
 }
 
@@ -25,6 +26,7 @@ interface RequestWithProfile extends Tables<"tool_requests"> {
   profiles: {
     username: string | null;
     phone_number: string | null;
+    email: string | null;
     avatar_url: string | null;
   } | null;
 }

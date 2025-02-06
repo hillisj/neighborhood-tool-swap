@@ -7,6 +7,7 @@ interface ToolWithProfile extends Tables<"tools"> {
   profiles: {
     username: string | null;
     phone_number: string | null;
+    email: string | null;
   } | null;
 }
 
@@ -20,7 +21,8 @@ export const useToolDetail = (id: string) => {
           *,
           profiles:owner_id (
             username,
-            phone_number
+            phone_number,
+            email
           )
         `)
         .eq('id', id)
