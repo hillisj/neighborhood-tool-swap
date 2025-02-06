@@ -10,6 +10,12 @@ import { useToolRequests } from "@/hooks/useToolRequests";
 import { useActiveCheckout } from "@/hooks/useActiveCheckout";
 import { ToolContent } from "@/components/tool-detail/ToolContent";
 
+export interface ProfileData {
+  username: string | null;
+  phone_number: string | null;
+  avatar_url?: string | null;
+}
+
 const ToolDetail = () => {
   const { id } = useParams();
 

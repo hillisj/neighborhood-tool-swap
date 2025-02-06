@@ -10,6 +10,12 @@ import { Database } from "@/integrations/supabase/types";
 
 type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
+interface Profile {
+  username: string | null;
+  phone_number: string | null;
+  avatar_url?: string | null;
+}
+
 const fetchTools = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   const currentUserId = user?.id;
@@ -77,7 +83,7 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [userProfile, setUserProfile] = useState<{ username?: string | null, phone_number?: string | null, avatar_url?: string | null } | null>(null);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
