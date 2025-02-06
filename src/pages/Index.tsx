@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 // Get all possible categories from the Supabase types
 type ToolCategory = 'Kids' | 'Music' | 'Electronics' | 'Exercise' | 'Emergency' | 'Household' | 'Gardening' | 'Tools' | 'Kitchen' | 'Other';
@@ -78,6 +79,7 @@ const Index = () => {
     queryFn: fetchTools,
   });
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userProfile, setUserProfile] = useState<{ username?: string | null, email?: string | null, avatar_url?: string | null } | null>(null);
   const navigate = useNavigate();
@@ -116,9 +118,13 @@ const Index = () => {
     }
   };
 
-  const filteredTools = tools?.filter(tool => 
-    selectedCategory ? tool.category === selectedCategory : true
-  );
+  const filteredTools = tools?.filter(tool => {
+    const matchesCategory = selectedCategory ? tool.category === selectedCategory : true;
+    const matchesSearch = searchQuery.trim() === '' ? true : 
+      tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -161,30 +167,39 @@ const Index = () => {
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 mb-6">
-          <Badge
-            variant="secondary"
-            className={cn(
-              "cursor-pointer",
-              selectedCategory === null ? "bg-accent hover:bg-accent/80" : ""
-            )}
-            onClick={() => setSelectedCategory(null)}
-          >
-            All
-          </Badge>
-          {CATEGORIES.map((category) => (
+        <div className="mb-6">
+          <Input
+            type="search"
+            placeholder="Search tools..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full mb-4"
+          />
+          <div className="flex flex-wrap gap-2">
             <Badge
-              key={category}
               variant="secondary"
               className={cn(
                 "cursor-pointer",
-                selectedCategory === category ? "bg-accent hover:bg-accent/80" : ""
+                selectedCategory === null ? "bg-accent hover:bg-accent/80" : ""
               )}
-              onClick={() => setSelectedCategory(category)}
+              onClick={() => setSelectedCategory(null)}
             >
-              {category}
+              All
             </Badge>
-          ))}
+            {CATEGORIES.map((category) => (
+              <Badge
+                key={category}
+                variant="secondary"
+                className={cn(
+                  "cursor-pointer",
+                  selectedCategory === category ? "bg-accent hover:bg-accent/80" : ""
+                )}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </Badge>
+            ))}
+          </div>
         </div>
 
         {isLoading ? (
