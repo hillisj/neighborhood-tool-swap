@@ -18,7 +18,7 @@ export const LibraryHeader = ({ isAuthenticated, userProfile }: LibraryHeaderPro
   return (
     <header className="bg-white shadow-sm py-4 px-4 sticky top-0 z-10">
       <div className="flex items-center justify-between max-w-md mx-auto">
-        <h1 className="text-xl font-semibold">Library</h1>
+        <h1 className="text-xl font-semibold">Lending Library</h1>
         {isAuthenticated ? (
           <Link to="/user-profile" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
             <span className="text-sm">
