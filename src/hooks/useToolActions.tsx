@@ -69,13 +69,36 @@ export const useToolActions = (id: string) => {
   };
 
   const handleDeleteTool = async () => {
+    // First check if there are any active requests or checkouts
+    const { data: activeRequests, error: checkError } = await supabase
+      .from('tool_requests')
+      .select('status')
+      .eq('tool_id', id)
+      .in('status', ['pending', 'approved']);
+
+    if (checkError) {
+      toast.error("Failed to check tool status");
+      return;
+    }
+
+    if (activeRequests && activeRequests.length > 0) {
+      toast.error("Cannot delete tool with active requests or checkouts");
+      return;
+    }
+
     const { error } = await supabase
       .from('tools')
       .delete()
       .eq('id', id);
 
     if (error) {
-      toast.error("Failed to delete tool");
+      if (error.code === '42501') {
+        toast.error("You don't have permission to delete this tool");
+      } else if (error.code === '23503') {
+        toast.error("Cannot delete tool with associated requests");
+      } else {
+        toast.error(`Error deleting tool: ${error.message}`);
+      }
       return;
     }
     
