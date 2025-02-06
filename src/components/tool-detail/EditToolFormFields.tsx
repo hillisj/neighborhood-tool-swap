@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Database } from "@/integrations/supabase/types";
@@ -37,6 +38,7 @@ export const EditToolFormFields = ({
           required
           minLength={2}
           autoComplete="off"
+          autoFocus={false}
         />
       </div>
 
