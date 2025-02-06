@@ -13,11 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Database } from "@/integrations/supabase/types";
+
+type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
 export default function AddTool() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<string>("");
+  const [category, setCategory] = useState<ToolCategory>("Tools");
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -65,6 +68,7 @@ export default function AddTool() {
         image_url: imageUrl,
         owner_id: user.id,
         category,
+        status: 'available'
       });
 
       if (error) throw error;
@@ -86,7 +90,7 @@ export default function AddTool() {
     }
   };
 
-  const categories = [
+  const categories: ToolCategory[] = [
     'Kids',
     'Music',
     'Electronics',
@@ -127,7 +131,7 @@ export default function AddTool() {
               <Select
                 required
                 value={category}
-                onValueChange={setCategory}
+                onValueChange={(value: ToolCategory) => setCategory(value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
