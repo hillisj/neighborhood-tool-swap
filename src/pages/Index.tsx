@@ -163,9 +163,10 @@ const Index = () => {
 
         <div className="flex flex-wrap gap-2 mb-6">
           <Badge
+            variant="secondary"
             className={cn(
-              "cursor-pointer hover:bg-accent/80",
-              selectedCategory === null ? "bg-accent" : "bg-secondary"
+              "cursor-pointer",
+              selectedCategory === null ? "bg-accent hover:bg-accent/80" : ""
             )}
             onClick={() => setSelectedCategory(null)}
           >
@@ -174,9 +175,10 @@ const Index = () => {
           {CATEGORIES.map((category) => (
             <Badge
               key={category}
+              variant="secondary"
               className={cn(
-                "cursor-pointer hover:bg-accent/80",
-                selectedCategory === category ? "bg-accent" : "bg-secondary"
+                "cursor-pointer",
+                selectedCategory === category ? "bg-accent hover:bg-accent/80" : ""
               )}
               onClick={() => setSelectedCategory(category)}
             >
