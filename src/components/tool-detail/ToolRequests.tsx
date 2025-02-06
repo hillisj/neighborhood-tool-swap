@@ -2,7 +2,7 @@ import { ToolRequest } from "@/components/ToolRequest";
 import { Tables } from "@/integrations/supabase/types";
 
 interface ToolRequestsProps {
-  requests: (Tables<"tool_requests"> & {
+  requests: (Tables<"item_requests"> & {
     profiles: {
       username: string | null;
       email: string | null;

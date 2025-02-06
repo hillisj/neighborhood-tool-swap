@@ -4,7 +4,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { EditToolDialog } from "./EditToolDialog";
 
 interface ToolDetailInfoProps {
-  tool: Tables<"tools"> & {
+  tool: Tables<"items"> & {
     profiles: {
       username: string | null;
       email: string | null;

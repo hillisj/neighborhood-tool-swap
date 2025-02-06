@@ -10,20 +10,20 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ToolContentProps {
-  tool: Tables<"tools"> & {
+  tool: Tables<"items"> & {
     profiles: {
       username: string | null;
       email: string | null;
     } | null;
   };
-  requests: (Tables<"tool_requests"> & {
+  requests: (Tables<"item_requests"> & {
     profiles: {
       username: string | null;
       email: string | null;
       avatar_url: string | null;
     } | null;
   })[];
-  activeCheckout: Tables<"tool_requests"> & {
+  activeCheckout: Tables<"item_requests"> & {
     profiles: {
       username: string | null;
       email: string | null;
