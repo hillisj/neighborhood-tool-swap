@@ -10,6 +10,7 @@ import { useToolRequests } from "@/hooks/useToolRequests";
 import { useActiveCheckout } from "@/hooks/useActiveCheckout";
 import { ToolContent } from "@/components/tool-detail/ToolContent";
 import { Database } from "@/integrations/supabase/types";
+import { Tables } from "@/integrations/supabase/types";
 
 type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
@@ -78,9 +79,9 @@ const ToolDetail = () => {
       <div className="max-w-2xl mx-auto p-4">
         <ToolDetailHeader />
         <ToolContent
-          tool={tool as ToolWithProfile}
-          requests={requests as RequestWithProfile[]}
-          activeCheckout={activeCheckout as RequestWithProfile}
+          tool={tool}
+          requests={requests}
+          activeCheckout={activeCheckout}
           isOwner={isOwner}
           hasPendingRequests={hasPendingRequests}
           requiresAuth={!currentUser}

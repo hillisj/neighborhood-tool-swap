@@ -8,27 +8,25 @@ import { BorrowerRequests } from "./BorrowerRequests";
 import { ToolHeader } from "./ToolHeader";
 import { OwnerActions } from "./OwnerActions";
 
-interface ToolContentProps {
-  tool: Tables<"tools"> & {
-    profiles: {
-      username: string | null;
-      email: string | null;
-    } | null;
-  };
-  requests: (Tables<"tool_requests"> & {
-    profiles: {
-      username: string | null;
-      email: string | null;
-      avatar_url: string | null;
-    } | null;
-  })[];
-  activeCheckout: Tables<"tool_requests"> & {
-    profiles: {
-      username: string | null;
-      email: string | null;
-      avatar_url: string | null;
-    } | null;
+interface ToolWithProfile extends Tables<"tools"> {
+  profiles: {
+    username: string | null;
+    phone_number: string | null;
   } | null;
+}
+
+interface RequestWithProfile extends Tables<"tool_requests"> {
+  profiles: {
+    username: string | null;
+    phone_number: string | null;
+    avatar_url: string | null;
+  } | null;
+}
+
+interface ToolContentProps {
+  tool: ToolWithProfile;
+  requests: RequestWithProfile[];
+  activeCheckout: RequestWithProfile | null;
   isOwner: boolean;
   hasPendingRequests: boolean;
   requiresAuth?: boolean;
