@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -66,7 +65,6 @@ export const RequestToolButton = ({ toolId, requiresAuth }: RequestToolButtonPro
       } else {
         toast.success("Request sent successfully");
         queryClient.invalidateQueries({ queryKey: ['tool-requests', toolId] });
-        window.location.reload();
       }
     } catch (error: any) {
       toast.error(`Error: ${error.message}`);
