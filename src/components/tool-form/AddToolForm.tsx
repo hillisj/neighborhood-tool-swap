@@ -83,7 +83,7 @@ export const AddToolForm = () => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <label htmlFor="name" className="text-sm font-medium">
-          Tool Name
+          Item Name
         </label>
         <Input
           id="name"
@@ -91,7 +91,7 @@ export const AddToolForm = () => {
           onChange={(e) => setName(e.target.value)}
           required
           minLength={2}
-          placeholder="e.g., Power Drill"
+          placeholder="e.g., Camping Tent"
         />
       </div>
 
@@ -112,14 +112,14 @@ export const AddToolForm = () => {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
-          placeholder="Describe your tool..."
+          placeholder="Describe your item..."
           className="min-h-[100px]"
         />
       </div>
 
       <div className="space-y-2">
         <label htmlFor="image" className="text-sm font-medium">
-          Tool Image
+          Item Image
         </label>
         <Input
           id="image"
@@ -135,7 +135,7 @@ export const AddToolForm = () => {
         className="w-full"
         disabled={loading}
       >
-        {loading ? "Adding Tool..." : "Add Tool"}
+        {loading ? "Adding Item..." : "Add Item"}
       </Button>
     </form>
   );
