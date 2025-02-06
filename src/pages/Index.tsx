@@ -7,6 +7,24 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
+// Get all possible categories from the Supabase types
+type ToolCategory = 'Kids' | 'Music' | 'Electronics' | 'Exercise' | 'Emergency' | 'Household' | 'Gardening' | 'Tools' | 'Kitchen' | 'Other';
+
+const CATEGORIES: ToolCategory[] = [
+  'Kids',
+  'Music',
+  'Electronics',
+  'Exercise',
+  'Emergency',
+  'Household',
+  'Gardening',
+  'Tools',
+  'Kitchen',
+  'Other'
+];
 
 const fetchTools = async () => {
   const { data: { user } } = await supabase.auth.getUser();
@@ -59,6 +77,7 @@ const Index = () => {
     queryKey: ['tools'],
     queryFn: fetchTools,
   });
+  const [selectedCategory, setSelectedCategory] = useState<ToolCategory | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userProfile, setUserProfile] = useState<{ username?: string | null, email?: string | null, avatar_url?: string | null } | null>(null);
   const navigate = useNavigate();
@@ -96,6 +115,10 @@ const Index = () => {
       setUserProfile(data);
     }
   };
+
+  const filteredTools = tools?.filter(tool => 
+    selectedCategory ? tool.category === selectedCategory : true
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -137,11 +160,36 @@ const Index = () => {
             </p>
           </div>
         )}
+
+        <div className="flex flex-wrap gap-2 mb-6">
+          <Badge
+            className={cn(
+              "cursor-pointer hover:bg-accent/80",
+              selectedCategory === null ? "bg-accent" : "bg-secondary"
+            )}
+            onClick={() => setSelectedCategory(null)}
+          >
+            All
+          </Badge>
+          {CATEGORIES.map((category) => (
+            <Badge
+              key={category}
+              className={cn(
+                "cursor-pointer hover:bg-accent/80",
+                selectedCategory === category ? "bg-accent" : "bg-secondary"
+              )}
+              onClick={() => setSelectedCategory(category)}
+            >
+              {category}
+            </Badge>
+          ))}
+        </div>
+
         {isLoading ? (
           <div className="text-center text-gray-500">Loading tools...</div>
         ) : (
           <div className="grid gap-6">
-            {tools?.map((tool) => (
+            {filteredTools?.map((tool) => (
               <ToolCard
                 key={tool.id}
                 id={tool.id}
@@ -153,9 +201,12 @@ const Index = () => {
                 requiresAuth={!isAuthenticated}
               />
             ))}
-            {tools?.length === 0 && (
+            {filteredTools?.length === 0 && (
               <div className="text-center text-gray-500">
-                No available tools at the moment. {isAuthenticated ? 'Add one to share!' : 'Sign in to add tools!'}
+                {selectedCategory 
+                  ? `No ${selectedCategory.toLowerCase()} tools available at the moment.`
+                  : 'No available tools at the moment.'} 
+                {isAuthenticated ? ' Add one to share!' : ' Sign in to add tools!'}
               </div>
             )}
           </div>
