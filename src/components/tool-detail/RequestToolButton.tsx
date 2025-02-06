@@ -17,7 +17,7 @@ export const RequestToolButton = ({ toolId, requiresAuth }: RequestToolButtonPro
 
   const handleRequestCheckout = async () => {
     if (requiresAuth) {
-      toast.error("Please sign in to request tools");
+      toast.error("Please sign in to request items");
       navigate('/auth');
       return;
     }
@@ -27,44 +27,44 @@ export const RequestToolButton = ({ toolId, requiresAuth }: RequestToolButtonPro
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        toast.error("You must be logged in to request tools");
+        toast.error("You must be logged in to request items");
         navigate('/auth');
         return;
       }
 
       const { data: activeRequest } = await supabase
-        .from('tool_requests')
+        .from('item_requests')
         .select('status')
-        .eq('tool_id', toolId)
+        .eq('item_id', toolId)
         .eq('requester_id', user.id)
         .in('status', ['pending', 'approved'])
         .maybeSingle();
 
       if (activeRequest) {
         const message = activeRequest.status === 'pending'
-          ? "You already have a pending request for this tool"
-          : "You currently have this tool checked out";
+          ? "You already have a pending request for this item"
+          : "You currently have this item checked out";
         toast.error(message);
         return;
       }
 
       const { error } = await supabase
-        .from('tool_requests')
+        .from('item_requests')
         .insert({
-          tool_id: toolId,
+          item_id: toolId,
           requester_id: user.id,
           status: 'pending'
         });
 
       if (error) {
         if (error.message.includes('violates row-level security')) {
-          toast.error("You cannot request your own tools");
+          toast.error("You cannot request your own items");
         } else {
           throw error;
         }
       } else {
         toast.success("Request sent successfully");
-        queryClient.invalidateQueries({ queryKey: ['tool-requests', toolId] });
+        queryClient.invalidateQueries({ queryKey: ['item-requests', toolId] });
       }
     } catch (error: any) {
       toast.error(`Error: ${error.message}`);

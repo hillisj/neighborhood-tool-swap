@@ -20,9 +20,71 @@ const ToolDetail = () => {
     },
   });
 
-  const { tool, loadingTool } = useToolDetail(id!);
-  const { requests } = useToolRequests(id!);
-  const { activeCheckout } = useActiveCheckout(id!, tool?.status || '');
+  const { data: tool, isLoading: loadingTool } = useQuery({
+    queryKey: ['item', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('items')
+        .select(`
+          *,
+          profiles:owner_id (
+            username,
+            email
+          )
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const { data: requests = [], isLoading: loadingRequests } = useQuery({
+    queryKey: ['item-requests', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('item_requests')
+        .select(`
+          *,
+          profiles:requester_id (
+            username,
+            email,
+            avatar_url
+          )
+        `)
+        .eq('item_id', id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+
+  const { data: activeCheckout } = useQuery({
+    queryKey: ['active-checkout', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('item_requests')
+        .select(`
+          *,
+          profiles:requester_id (
+            username,
+            email,
+            avatar_url
+          )
+        `)
+        .eq('item_id', id)
+        .eq('status', 'approved')
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id && tool?.status === 'checked_out',
+  });
 
   const hasPendingRequests = requests.some(request => request.status === 'pending');
   const isOwner = currentUser?.id === tool?.owner_id;
@@ -40,7 +102,7 @@ const ToolDetail = () => {
     return (
       <div className="min-h-screen bg-gray-50 p-4">
         <div className="max-w-2xl mx-auto text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Tool not found</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Item not found</h1>
           <button onClick={() => window.history.back()}>Go back</button>
         </div>
         <BottomNav />
