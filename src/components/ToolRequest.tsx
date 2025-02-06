@@ -49,22 +49,22 @@ export const ToolRequest = ({
             )}
             {createdAt && (
               <p className="text-sm text-gray-600">
-                Requested at: {format(new Date(createdAt), "MMM d, yyyy")}
+                <span className="font-bold">Requested:</span> {format(new Date(createdAt), "MMM d, yyyy")}
               </p>
             )}
             {dueDate && (
               <p className="text-sm text-gray-600">
-                Due: {format(new Date(dueDate), "MMM d, yyyy")}
+                <span className="font-bold">Due:</span> {format(new Date(dueDate), "MMM d, yyyy")}
               </p>
             )}
             {status === 'approved' && updatedAt && (
               <p className="text-sm text-gray-600">
-                Checked out: {format(new Date(updatedAt), "MMM d, yyyy")}
+                <span className="font-bold">Checked out:</span> {format(new Date(updatedAt), "MMM d, yyyy")}
               </p>
             )}
             {returnDate && (
               <p className="text-sm text-gray-600">
-                Returned: {format(new Date(returnDate), "MMM d, yyyy")}
+                <span className="font-bold">Returned:</span> {format(new Date(returnDate), "MMM d, yyyy")}
               </p>
             )}
             <div className="flex items-center gap-2 mt-1">
