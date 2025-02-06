@@ -78,7 +78,7 @@ export const CheckedOutTools = () => {
   return (
     <div className="space-y-8">
       <div className="space-y-4">
-        <h2 className="text-lg font-medium">Borrowed Tools</h2>
+        <h2 className="text-lg font-medium">Borrowed</h2>
         <div className="grid gap-4">
           {checkedOutTools?.map((tool) => (
             <ToolCard
