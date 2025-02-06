@@ -6,7 +6,6 @@ import { CurrentCheckout } from "./CurrentCheckout";
 import { DangerZone } from "./DangerZone";
 import { RequestToolButton } from "./RequestToolButton";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 
 interface ToolContentProps {
   tool: Tables<"items"> & {
@@ -31,6 +30,7 @@ interface ToolContentProps {
   } | null;
   isLoading: boolean;
   isOwner: boolean;
+  requiresAuth?: boolean;
 }
 
 export const ToolContent = ({
@@ -39,6 +39,7 @@ export const ToolContent = ({
   activeCheckout,
   isLoading,
   isOwner,
+  requiresAuth,
 }: ToolContentProps) => {
   const { user } = useAuth();
 
@@ -69,13 +70,13 @@ export const ToolContent = ({
 
       <div className="space-y-6">
         {!isOwner && canRequest && (
-          <RequestToolButton id={tool.id} />
+          <RequestToolButton toolId={tool.id} requiresAuth={requiresAuth} />
         )}
 
-        {tool.status !== "available" && (
+        {tool.status !== "available" && activeCheckout && (
           <CurrentCheckout
-            status={tool.status}
             checkout={activeCheckout}
+            onMarkReturned={() => {}}
           />
         )}
 
@@ -90,7 +91,7 @@ export const ToolContent = ({
               requests={requests}
               toolId={tool.id}
             />
-            <DangerZone toolId={tool.id} />
+            <DangerZone toolId={tool.id} onDelete={() => {}} />
           </>
         )}
       </div>

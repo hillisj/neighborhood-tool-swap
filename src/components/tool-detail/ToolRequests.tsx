@@ -24,18 +24,7 @@ export const ToolRequests = ({ requests, toolId }: ToolRequestsProps) => {
         {requests.map((request) => (
           <RequestStatus
             key={request.id}
-            requesterName={
-              request.profiles?.username ||
-              request.profiles?.email?.split("@")[0] ||
-              "Anonymous"
-            }
-            status={request.status}
-            dueDate={request.due_date}
-            avatarUrl={request.profiles?.avatar_url}
-            requestId={request.id}
-            toolId={toolId}
-            requesterId={request.id}
-            updatedAt={request.updated_at}
+            status={request.status || "pending"}
           />
         ))}
       </div>
