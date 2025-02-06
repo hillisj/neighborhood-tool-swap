@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,8 @@ import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const UserProfile = () => {
   const {
@@ -24,6 +27,34 @@ const UserProfile = () => {
     handleLogout,
     refetch
   } = useProfile();
+
+  const { data: lendingCount } = useQuery({
+    queryKey: ['lending-count'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .rpc('get_user_lending_count', { user_id: user.id });
+
+      if (error) throw error;
+      return data || 0;
+    },
+  });
+
+  const { data: borrowingCount } = useQuery({
+    queryKey: ['borrowing-count'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .rpc('get_user_borrowing_count', { user_id: user.id });
+
+      if (error) throw error;
+      return data || 0;
+    },
+  });
 
   useEffect(() => {
     if (profile) {
@@ -60,6 +91,17 @@ const UserProfile = () => {
           ) : (
             <h2 className="text-xl font-medium">{username || "Anonymous"}</h2>
           )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 bg-white p-4 rounded-lg shadow-sm">
+          <div className="text-center">
+            <div className="text-2xl font-semibold text-blue-600">{lendingCount}</div>
+            <div className="text-sm text-gray-600">Times Lent</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-semibold text-green-600">{borrowingCount}</div>
+            <div className="text-sm text-gray-600">Times Borrowed</div>
+          </div>
         </div>
 
         <div className="space-y-4">
