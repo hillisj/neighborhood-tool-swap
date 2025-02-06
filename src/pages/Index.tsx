@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -5,8 +6,9 @@ import { BottomNav } from "@/components/BottomNav";
 import { LibraryHeader } from "@/components/library/LibraryHeader";
 import { SearchAndFilters } from "@/components/library/SearchAndFilters";
 import { ToolList } from "@/components/library/ToolList";
+import { Database } from "@/integrations/supabase/types";
 
-type ToolCategory = 'Kids' | 'Music' | 'Electronics' | 'Exercise' | 'Emergency' | 'Household' | 'Gardening' | 'Tools' | 'Kitchen' | 'Other';
+type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
 const fetchTools = async () => {
   const { data: { user } } = await supabase.auth.getUser();
