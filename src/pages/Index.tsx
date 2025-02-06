@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { LibraryHeader } from "@/components/library/LibraryHeader";
-import { AuthBanner } from "@/components/library/AuthBanner";
 import { SearchAndFilters } from "@/components/library/SearchAndFilters";
 import { ToolList } from "@/components/library/ToolList";
 
@@ -111,10 +110,6 @@ const Index = () => {
       />
 
       <main className="container max-w-md mx-auto px-4 py-6">
-        {isAuthenticated !== null && (
-          <AuthBanner isAuthenticated={!!isAuthenticated} />
-        )}
-
         <SearchAndFilters
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
