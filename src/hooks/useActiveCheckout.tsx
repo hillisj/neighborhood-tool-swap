@@ -6,7 +6,7 @@ export const useActiveCheckout = (id: string, toolStatus: string) => {
     queryKey: ['active-checkout', id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('tool_requests')
+        .from('item_requests')
         .select(`
           *,
           profiles:requester_id (
@@ -15,7 +15,7 @@ export const useActiveCheckout = (id: string, toolStatus: string) => {
             avatar_url
           )
         `)
-        .eq('tool_id', id)
+        .eq('item_id', id)
         .eq('status', 'approved')
         .maybeSingle();
 
