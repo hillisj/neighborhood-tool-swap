@@ -6,14 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BottomNav } from "@/components/BottomNav";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Database } from "@/integrations/supabase/types";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
@@ -26,6 +20,19 @@ export default function AddTool() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const categories: ToolCategory[] = [
+    'Kids',
+    'Music',
+    'Electronics',
+    'Exercise',
+    'Emergency',
+    'Household',
+    'Gardening',
+    'Tools',
+    'Kitchen',
+    'Other'
+  ];
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setImage(e.target.files[0]);
@@ -37,13 +44,11 @@ export default function AddTool() {
     setLoading(true);
 
     try {
-      // 1. Get the current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user logged in");
 
       let imageUrl = null;
 
-      // 2. If there's an image, upload it to storage
       if (image) {
         const fileExt = image.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
@@ -53,7 +58,6 @@ export default function AddTool() {
 
         if (uploadError) throw uploadError;
 
-        // Get the public URL
         const { data: { publicUrl } } = supabase.storage
           .from('tools')
           .getPublicUrl(fileName);
@@ -61,7 +65,6 @@ export default function AddTool() {
         imageUrl = publicUrl;
       }
 
-      // 3. Create the tool record
       const { error } = await supabase.from('tools').insert({
         name,
         description,
@@ -90,17 +93,6 @@ export default function AddTool() {
     }
   };
 
-  const categories: ToolCategory[] = [
-    'Kids',
-    'Music',
-    'Electronics',
-    'Exercise',
-    'Emergency',
-    'Household',
-    'Gardening',
-    'Tools'
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="pb-20">
@@ -125,25 +117,25 @@ export default function AddTool() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="category" className="text-sm font-medium">
-                Category
-              </label>
-              <Select
-                required
+              <label className="text-sm font-medium">Category</label>
+              <ToggleGroup
+                type="single"
                 value={category}
-                onValueChange={(value: ToolCategory) => setCategory(value)}
+                onValueChange={(value: ToolCategory) => {
+                  if (value) setCategory(value);
+                }}
+                className="flex flex-wrap gap-2"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                {categories.map((cat) => (
+                  <ToggleGroupItem
+                    key={cat}
+                    value={cat}
+                    className="rounded-full px-4 py-2 text-sm"
+                  >
+                    {cat}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
             </div>
 
             <div className="space-y-2">
