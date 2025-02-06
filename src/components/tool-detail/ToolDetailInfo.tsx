@@ -51,6 +51,11 @@ export const ToolDetailInfo = ({ tool, hasPendingRequests, isOwner }: ToolDetail
       <p className="text-gray-600 mb-6">{tool.description}</p>
 
       <div className="space-y-4">
+        <div>
+          <h3 className="text-sm font-medium text-gray-500">Category</h3>
+          <p className="text-gray-900">{tool.category}</p>
+        </div>
+
         {tool.brand && (
           <div>
             <h3 className="text-sm font-medium text-gray-500">Brand</h3>

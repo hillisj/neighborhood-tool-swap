@@ -6,6 +6,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +20,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Database } from "@/integrations/supabase/types";
+
+type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
 interface EditToolDialogProps {
   tool: {
@@ -20,6 +30,7 @@ interface EditToolDialogProps {
     name: string;
     description: string | null;
     image_url: string | null;
+    category: ToolCategory;
   };
 }
 
@@ -27,10 +38,22 @@ export const EditToolDialog = ({ tool }: EditToolDialogProps) => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(tool.name);
   const [description, setDescription] = useState(tool.description || "");
+  const [category, setCategory] = useState<ToolCategory>(tool.category);
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const categories: ToolCategory[] = [
+    'Kids',
+    'Music',
+    'Electronics',
+    'Exercise',
+    'Emergency',
+    'Household',
+    'Gardening',
+    'Tools'
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +86,7 @@ export const EditToolDialog = ({ tool }: EditToolDialogProps) => {
         .update({
           name,
           description,
+          category,
           image_url: imageUrl,
           updated_at: new Date().toISOString(),
         })
@@ -113,6 +137,27 @@ export const EditToolDialog = ({ tool }: EditToolDialogProps) => {
               required
               minLength={2}
             />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="category" className="text-sm font-medium">
+              Category
+            </label>
+            <Select
+              value={category}
+              onValueChange={(value: ToolCategory) => setCategory(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
