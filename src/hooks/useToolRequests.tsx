@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -11,7 +12,7 @@ export const useToolRequests = (id: string) => {
           *,
           profiles:requester_id (
             username,
-            email,
+            phone_number,
             avatar_url
           )
         `)

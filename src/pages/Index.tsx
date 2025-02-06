@@ -20,7 +20,7 @@ const fetchTools = async () => {
       *,
       profiles:owner_id (
         username,
-        email
+        phone_number
       ),
       tool_requests (
         status
@@ -77,7 +77,7 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [userProfile, setUserProfile] = useState<{ username?: string | null, email?: string | null, avatar_url?: string | null } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ username?: string | null, phone_number?: string | null, avatar_url?: string | null } | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -104,7 +104,7 @@ const Index = () => {
   const fetchUserProfile = async (userId: string) => {
     const { data, error } = await supabase
       .from('profiles')
-      .select('username, email, avatar_url')
+      .select('username, phone_number, avatar_url')
       .eq('id', userId)
       .single();
     

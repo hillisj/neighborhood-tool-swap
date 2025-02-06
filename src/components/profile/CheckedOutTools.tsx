@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ToolCard } from "@/components/ToolCard";
@@ -15,7 +16,7 @@ export const CheckedOutTools = () => {
           *,
           profiles:owner_id (
             username,
-            email
+            phone_number
           ),
           tool_requests!inner (
             status,
@@ -49,7 +50,7 @@ export const CheckedOutTools = () => {
           *,
           profiles:owner_id (
             username,
-            email
+            phone_number
           ),
           tool_requests!inner (
             status,
@@ -85,13 +86,9 @@ export const CheckedOutTools = () => {
               key={tool.id}
               id={tool.id}
               name={tool.name}
-              description={tool.description}
+              description={tool.description || ''}
               imageUrl={tool.image_url || "/placeholder.svg"}
-              owner={
-                tool.profiles?.username || 
-                tool.profiles?.email?.split('@')[0] || 
-                'Anonymous'
-              }
+              owner={tool.profiles?.username || tool.profiles?.phone_number || 'Anonymous'}
               status={tool.status}
             />
           ))}
@@ -111,13 +108,9 @@ export const CheckedOutTools = () => {
               key={tool.id}
               id={tool.id}
               name={tool.name}
-              description={tool.description}
+              description={tool.description || ''}
               imageUrl={tool.image_url || "/placeholder.svg"}
-              owner={
-                tool.profiles?.username || 
-                tool.profiles?.email?.split('@')[0] || 
-                'Anonymous'
-              }
+              owner={tool.profiles?.username || tool.profiles?.phone_number || 'Anonymous'}
               status={tool.status}
             />
           ))}

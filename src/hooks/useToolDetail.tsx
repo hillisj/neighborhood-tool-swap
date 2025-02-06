@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -11,7 +12,7 @@ export const useToolDetail = (id: string) => {
           *,
           profiles:owner_id (
             username,
-            email
+            phone_number
           )
         `)
         .eq('id', id)

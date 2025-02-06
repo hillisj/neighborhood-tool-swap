@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ToolCard } from "@/components/ToolCard";
@@ -15,7 +16,7 @@ export const OwnedTools = () => {
           *,
           profiles:owner_id (
             username,
-            email
+            phone_number
           ),
           tool_requests (
             status,
@@ -26,7 +27,6 @@ export const OwnedTools = () => {
 
       if (toolsError) throw toolsError;
 
-      // Process tools to include request status
       return tools.map(tool => ({
         ...tool,
         status: tool.tool_requests?.some(request => request.status === 'pending')
@@ -59,9 +59,9 @@ export const OwnedTools = () => {
               key={tool.id}
               id={tool.id}
               name={tool.name}
-              description={tool.description}
+              description={tool.description || ''}
               imageUrl={tool.image_url || "/placeholder.svg"}
-              owner={tool.profiles?.username || tool.profiles?.email?.split('@')[0] || 'Anonymous'}
+              owner={tool.profiles?.username || tool.profiles?.phone_number || 'Anonymous'}
               status={tool.status}
             />
           ))}
