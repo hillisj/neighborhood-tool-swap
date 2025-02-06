@@ -1,14 +1,11 @@
 import { Tables } from "@/integrations/supabase/types";
-import { ToolDetailInfo } from "./ToolDetailInfo";
-import { ToolRequests } from "./ToolRequests";
-import { CurrentCheckout } from "./CurrentCheckout";
-import { ToolImage } from "./ToolImage";
 import { useToolActions } from "@/hooks/useToolActions";
 import { RequestToolButton } from "./RequestToolButton";
-import { DangerZone } from "./DangerZone";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { UserRequests } from "./UserRequests";
+import { ToolHeader } from "./ToolHeader";
+import { OwnerActions } from "./OwnerActions";
 
 interface ToolContentProps {
   tool: Tables<"tools"> & {
@@ -51,7 +48,6 @@ export const ToolContent = ({
     handleDeleteTool,
   } = useToolActions(tool.id);
 
-  // Get the current user to check for their pending requests
   const { data: currentUser } = useQuery({
     queryKey: ['current-user'],
     queryFn: async () => {
@@ -60,35 +56,22 @@ export const ToolContent = ({
     },
   });
 
-  // Check if the current user has a pending request
   const hasUserPendingRequest = currentUser && requests.some(
     request => request.requester_id === currentUser.id && request.status === 'pending'
   );
 
-  // Filter requests for the current user
   const userRequests = currentUser 
     ? requests.filter(request => request.requester_id === currentUser.id)
     : [];
 
-  // Only show the request button if:
-  // 1. User is not the owner
-  // 2. Tool is available
-  // 3. User doesn't have a pending request
   const showRequestButton = !isOwner && 
     tool.status === 'available' && 
     !hasUserPendingRequest;
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      <ToolImage 
-        imageUrl={tool.image_url} 
-        name={tool.name} 
-        status={tool.status}
-        hasPendingRequests={hasPendingRequests}
-      />
-      
-      <ToolDetailInfo 
-        tool={tool} 
+      <ToolHeader 
+        tool={tool}
         hasPendingRequests={hasPendingRequests}
         isOwner={isOwner}
       />
@@ -104,24 +87,17 @@ export const ToolContent = ({
         <UserRequests requests={userRequests} toolName={tool.name} />
       )}
 
-      {isOwner && tool.status === 'checked_out' && activeCheckout && (
-        <CurrentCheckout
-          checkout={activeCheckout}
-          onMarkReturned={() => handleMarkReturned(activeCheckout.id)}
-        />
-      )}
-
-      {isOwner && requests && requests.length > 0 && (
-        <ToolRequests
+      {isOwner && (
+        <OwnerActions
+          tool={tool}
           requests={requests}
-          onApprove={handleApproveRequest}
-          onReject={handleRejectRequest}
+          activeCheckout={activeCheckout}
+          onApproveRequest={handleApproveRequest}
+          onRejectRequest={handleRejectRequest}
           onMarkReturned={handleMarkReturned}
-          toolName={tool.name}
+          onDeleteTool={handleDeleteTool}
         />
       )}
-
-      {isOwner && <DangerZone onDelete={handleDeleteTool} />}
     </div>
   );
 };
