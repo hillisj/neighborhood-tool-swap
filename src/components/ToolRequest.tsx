@@ -53,6 +53,11 @@ export const ToolRequest = ({
                 <span className="font-bold">Requested:</span> {format(new Date(createdAt), "MMM d, yyyy")}
               </p>
             )}
+            {status === 'rejected' && updatedAt && (
+              <p className="text-base text-gray-600">
+                <span className="font-bold">Rejected:</span> {format(new Date(updatedAt), "MMM d, yyyy")}
+              </p>
+            )}
             {(status === 'approved' || status === 'returned') && updatedAt && (
               <p className="text-base text-gray-600">
                 <span className="font-bold">Checked out:</span> {format(new Date(updatedAt), "MMM d, yyyy")}
