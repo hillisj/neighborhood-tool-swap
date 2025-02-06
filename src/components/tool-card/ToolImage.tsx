@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface ToolImageProps {
   imageUrl: string;
@@ -31,15 +32,17 @@ export const ToolImage = ({ imageUrl, name, status }: ToolImageProps) => {
   };
 
   return (
-    <div className="aspect-square relative overflow-hidden bg-gray-100">
-      <img
-        src={imageUrl}
-        alt={name}
-        className={`object-cover w-full h-full transition-opacity duration-300 ${
-          imageLoaded ? "opacity-100" : "opacity-0"
-        }`}
-        onLoad={() => setImageLoaded(true)}
-      />
+    <div className="relative overflow-hidden bg-gray-100">
+      <AspectRatio ratio={4/3}>
+        <img
+          src={imageUrl}
+          alt={name}
+          className={`object-cover w-full h-full transition-opacity duration-300 ${
+            imageLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          onLoad={() => setImageLoaded(true)}
+        />
+      </AspectRatio>
       <div className="absolute top-2 right-2">
         {getStatusBadge(status)}
       </div>
