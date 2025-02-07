@@ -129,9 +129,6 @@ export default function Auth() {
                   required
                   className="w-full"
                 />
-                <p className="text-sm text-gray-500 mt-1">
-                  Format: Enter your 10-digit number in any format
-                </p>
                 <p className="text-xs text-gray-500 mt-2">
                   By clicking this button, I agree to receive SMS updates from Neighbor Goods at the phone number provided. Msg & data rates may apply. Reply STOP to opt out.
                 </p>
