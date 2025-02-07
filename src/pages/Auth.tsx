@@ -25,13 +25,31 @@ export default function Auth() {
     });
   }, [navigate]);
 
+  const formatPhoneNumber = (input: string): string => {
+    // Remove all non-numeric characters
+    const numbers = input.replace(/\D/g, '');
+    
+    // Ensure the number has exactly 10 digits
+    if (numbers.length !== 10 && numbers.length !== 11) {
+      throw new Error("Phone number must be 10 digits");
+    }
+
+    // If it's 11 digits and starts with 1, use those digits
+    // If it's 10 digits, add +1 prefix
+    const formattedNumber = numbers.length === 11 && numbers.startsWith('1')
+      ? `+${numbers}`
+      : `+1${numbers.slice(-10)}`;
+
+    return formattedNumber;
+  };
+
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Format phone number to ensure +1 prefix
-      const formattedPhone = phone.startsWith('+1') ? phone : `+1${phone}`;
+      // Format phone number before sending
+      const formattedPhone = formatPhoneNumber(phone);
       
       const { error } = await supabase.auth.signInWithOtp({
         phone: formattedPhone,
@@ -60,7 +78,7 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      const formattedPhone = phone.startsWith('+1') ? phone : `+1${phone}`;
+      const formattedPhone = formatPhoneNumber(phone);
       
       const { error } = await supabase.auth.verifyOtp({
         phone: formattedPhone,
@@ -105,15 +123,14 @@ export default function Auth() {
               <div>
                 <Input
                   type="tel"
-                  placeholder="Phone Number (e.g. +12345678900)"
+                  placeholder="Phone Number (e.g. 123-456-7890)"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required
-                  pattern="^\+?1[0-9]{10}$"
                   className="w-full"
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                  Format: +1 followed by your 10-digit number
+                  Format: Enter your 10-digit number in any format
                 </p>
                 <p className="text-xs text-gray-500 mt-2">
                   By clicking this button, I agree to receive SMS updates from Neighbor Goods at the phone number provided. Msg & data rates may apply. Reply STOP to opt out.
