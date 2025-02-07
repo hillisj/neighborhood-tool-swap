@@ -1,5 +1,6 @@
 
 import { BottomNav } from "@/components/BottomNav";
+import { Link } from "react-router-dom";
 
 const About = () => {
   return (
@@ -34,9 +35,12 @@ const About = () => {
           </section>
 
           <section className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-gray-600">
+            <p className="text-gray-600 mb-4">
               This app created by your neighbor, Jon Hillis. If you have questions, comments, bug reports, or feedback, email me at: hillis.jd@gmail.com. Thanks! : )
             </p>
+            <Link to="/terms" className="text-blue-600 hover:underline">
+              Terms of Service & Privacy Policy
+            </Link>
           </section>
         </div>
       </main>

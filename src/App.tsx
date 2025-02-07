@@ -15,6 +15,7 @@ import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
 import ToolDetail from "./pages/ToolDetail";
 import About from "./pages/About";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/tool/:id" element={<ToolDetail />} />
           <Route path="/about" element={<About />} />
+          <Route path="/terms" element={<Terms />} />
           <Route
             path="/add"
             element={
