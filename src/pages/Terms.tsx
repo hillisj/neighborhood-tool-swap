@@ -63,7 +63,7 @@ const Terms = () => {
 
             <div>
               <h3 className="font-medium mb-2">6. Your Choices</h3>
-              <p>You can stop using the App at any time. To delete your data, contact us at [Your Contact Email].</p>
+              <p>You can stop using the App at any time. To delete your data, contact us at hillis.jd@gmail.com.</p>
             </div>
 
             <div>
