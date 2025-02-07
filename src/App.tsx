@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import PhoneAuth from "./pages/PhoneAuth";
 import NotFound from "./pages/NotFound";
 import AddTool from "./pages/AddTool";
 import Profile from "./pages/Profile";
@@ -50,6 +51,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/phone-auth" element={<PhoneAuth />} />
           <Route path="/" element={<Index />} />
           <Route path="/tool/:id" element={<ToolDetail />} />
           <Route path="/about" element={<About />} />
