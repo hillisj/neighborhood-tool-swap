@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -130,7 +130,11 @@ export default function Auth() {
                   className="w-full"
                 />
                 <p className="text-xs text-gray-500 mt-2">
-                  By clicking this button, I agree to receive SMS updates from Neighbor Goods at the phone number provided. Msg & data rates may apply. Reply STOP to opt out.
+                  By clicking this button, I agree to receive SMS updates from Neighbor Goods at the phone number provided. Msg & data rates may apply. Reply STOP to opt out.{" "}
+                  <Link to="/terms" className="text-blue-600 hover:underline">
+                    View Terms & Privacy
+                  </Link>
+                  .
                 </p>
               </div>
               <Button
