@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { LibraryHeader } from "@/components/library/LibraryHeader";
@@ -10,11 +10,16 @@ import { Database } from "@/integrations/supabase/types";
 
 type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
-const fetchTools = async () => {
+const ITEMS_PER_PAGE = 12;
+
+const fetchToolsPage = async ({ pageParam = 0 }) => {
+  const from = pageParam * ITEMS_PER_PAGE;
+  const to = from + ITEMS_PER_PAGE - 1;
+
   const { data: { user } } = await supabase.auth.getUser();
   const currentUserId = user?.id;
 
-  const { data: tools, error: toolsError } = await supabase
+  const { data: tools, error: toolsError, count } = await supabase
     .from('tools')
     .select(`
       *,
@@ -25,15 +30,17 @@ const fetchTools = async () => {
       tool_requests (
         status
       )
-    `)
+    `, { count: 'exact' })
+    .range(from, to)
     .order('created_at', { ascending: false });
 
   if (toolsError) throw toolsError;
 
-  // Fetch categories for all tools
+  // Fetch categories for the loaded tools
   const { data: categories, error: categoriesError } = await supabase
     .from('tool_categories')
-    .select('tool_id, category');
+    .select('tool_id, category')
+    .in('tool_id', tools.map(tool => tool.id));
 
   if (categoriesError) throw categoriesError;
 
@@ -60,20 +67,36 @@ const fetchTools = async () => {
     'checked_out': 2
   };
 
-  return processedTools.sort((a, b) => {
+  const sortedTools = processedTools.sort((a, b) => {
     if (a.owner_id === currentUserId && b.owner_id !== currentUserId) return 1;
     if (a.owner_id !== currentUserId && b.owner_id === currentUserId) return -1;
     
     return statusOrder[a.status as keyof typeof statusOrder] - 
            statusOrder[b.status as keyof typeof statusOrder];
   });
+
+  const hasNextPage = count ? from + ITEMS_PER_PAGE < count : false;
+
+  return {
+    tools: sortedTools,
+    nextPage: hasNextPage ? pageParam + 1 : undefined,
+  };
 };
 
 const Index = () => {
-  const { data: tools, isLoading } = useQuery({
+  const { 
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isLoading,
+    isFetchingNextPage
+  } = useInfiniteQuery({
     queryKey: ['tools'],
-    queryFn: fetchTools,
+    queryFn: fetchToolsPage,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0
   });
+
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -113,7 +136,9 @@ const Index = () => {
     }
   };
 
-  const filteredTools = tools?.filter(tool => {
+  const allTools = data?.pages.flatMap(page => page.tools) ?? [];
+
+  const filteredTools = allTools.filter(tool => {
     const matchesCategory = selectedCategory 
       ? tool.categories.includes(selectedCategory)
       : true;
@@ -142,6 +167,9 @@ const Index = () => {
           tools={filteredTools}
           isLoading={isLoading}
           isAuthenticated={!!isAuthenticated}
+          hasNextPage={hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={isFetchingNextPage}
         />
       </main>
 
