@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -94,7 +93,9 @@ const Index = () => {
     queryKey: ['tools'],
     queryFn: fetchToolsPage,
     getNextPageParam: (lastPage) => lastPage.nextPage,
-    initialPageParam: 0
+    initialPageParam: 0,
+    staleTime: 1000 * 60 * 5, // Data considered fresh for 5 minutes
+    gcTime: 1000 * 60 * 30, // Keep unused data in cache for 30 minutes
   });
 
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | null>(null);

@@ -21,7 +21,10 @@ export const useToolDetail = (id: string) => {
       if (error) throw error;
       return data;
     },
+    staleTime: 1000 * 60 * 5, // Data considered fresh for 5 minutes
+    gcTime: 1000 * 60 * 30, // Keep unused data in cache for 30 minutes
   });
 
   return { tool, loadingTool };
 };
+
