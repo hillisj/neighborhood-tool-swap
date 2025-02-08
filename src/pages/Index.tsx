@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { LibraryHeader } from "@/components/library/LibraryHeader";
@@ -10,30 +10,43 @@ import { Database } from "@/integrations/supabase/types";
 
 type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
-const fetchTools = async () => {
+const ITEMS_PER_PAGE = 10;
+
+const fetchTools = async ({ pageParam = 0 }) => {
   const { data: { user } } = await supabase.auth.getUser();
   const currentUserId = user?.id;
+
+  const from = pageParam * ITEMS_PER_PAGE;
+  const to = from + ITEMS_PER_PAGE - 1;
 
   const { data: tools, error: toolsError } = await supabase
     .from('tools')
     .select(`
-      *,
+      id,
+      name,
+      description,
+      image_url,
+      status,
+      owner_id,
       profiles:owner_id (
         username,
         email
       ),
-      tool_requests (
+      tool_requests!inner (
         status
       )
     `)
+    .range(from, to)
     .order('created_at', { ascending: false });
 
   if (toolsError) throw toolsError;
 
-  // Fetch categories for all tools
+  // Fetch categories for this batch of tools only
+  const toolIds = tools.map(tool => tool.id);
   const { data: categories, error: categoriesError } = await supabase
     .from('tool_categories')
-    .select('tool_id, category');
+    .select('tool_id, category')
+    .in('tool_id', toolIds);
 
   if (categoriesError) throw categoriesError;
 
@@ -70,14 +83,29 @@ const fetchTools = async () => {
 };
 
 const Index = () => {
-  const { data: tools, isLoading } = useQuery({
+  const queryClient = useQueryClient();
+  const { data: tools, isLoading, fetchNextPage, hasNextPage } = useQuery({
     queryKey: ['tools'],
     queryFn: fetchTools,
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+    cacheTime: 1000 * 60 * 30, // Keep cache for 30 minutes
   });
+
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userProfile, setUserProfile] = useState<{ username?: string | null, email?: string | null, avatar_url?: string | null } | null>(null);
+
+  // Prefetch next page
+  useEffect(() => {
+    if (tools?.length) {
+      const nextPage = Math.ceil(tools.length / ITEMS_PER_PAGE);
+      queryClient.prefetchQuery({
+        queryKey: ['tools', nextPage],
+        queryFn: () => fetchTools({ pageParam: nextPage }),
+      });
+    }
+  }, [tools, queryClient]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -113,15 +141,17 @@ const Index = () => {
     }
   };
 
-  const filteredTools = tools?.filter(tool => {
-    const matchesCategory = selectedCategory 
-      ? tool.categories.includes(selectedCategory)
-      : true;
-    const matchesSearch = searchQuery.trim() === '' ? true : 
-      tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tool.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredTools = tools?.pages?.flatMap(page => 
+    page.filter(tool => {
+      const matchesCategory = selectedCategory 
+        ? tool.categories.includes(selectedCategory)
+        : true;
+      const matchesSearch = searchQuery.trim() === '' ? true : 
+        tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tool.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    })
+  ) ?? [];
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -142,6 +172,8 @@ const Index = () => {
           tools={filteredTools}
           isLoading={isLoading}
           isAuthenticated={!!isAuthenticated}
+          onLoadMore={() => fetchNextPage()}
+          hasMore={!!hasNextPage}
         />
       </main>
 
@@ -151,3 +183,4 @@ const Index = () => {
 };
 
 export default Index;
+
