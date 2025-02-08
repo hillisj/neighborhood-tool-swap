@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { LibraryHeader } from "@/components/library/LibraryHeader";
@@ -9,45 +10,34 @@ import { Database } from "@/integrations/supabase/types";
 
 type ToolCategory = Database["public"]["Enums"]["tool_category"];
 
-const ITEMS_PER_PAGE = 10;
-
-const fetchTools = async ({ pageParam = 0 }) => {
+const fetchTools = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   const currentUserId = user?.id;
-
-  const from = pageParam * ITEMS_PER_PAGE;
-  const to = from + ITEMS_PER_PAGE - 1;
 
   const { data: tools, error: toolsError } = await supabase
     .from('tools')
     .select(`
-      id,
-      name,
-      description,
-      image_url,
-      status,
-      owner_id,
+      *,
       profiles:owner_id (
         username,
         email
       ),
-      tool_requests!inner (
+      tool_requests (
         status
       )
     `)
-    .range(from, to)
     .order('created_at', { ascending: false });
 
   if (toolsError) throw toolsError;
 
-  const toolIds = tools.map(tool => tool.id);
+  // Fetch categories for all tools
   const { data: categories, error: categoriesError } = await supabase
     .from('tool_categories')
-    .select('tool_id, category')
-    .in('tool_id', toolIds);
+    .select('tool_id, category');
 
   if (categoriesError) throw categoriesError;
 
+  // Create a map of tool_id to categories
   const toolCategories = categories.reduce((acc: { [key: string]: ToolCategory[] }, curr) => {
     if (!acc[curr.tool_id]) {
       acc[curr.tool_id] = [];
@@ -70,43 +60,24 @@ const fetchTools = async ({ pageParam = 0 }) => {
     'checked_out': 2
   };
 
-  return {
-    items: processedTools.sort((a, b) => {
-      if (a.owner_id === currentUserId && b.owner_id !== currentUserId) return 1;
-      if (a.owner_id !== currentUserId && b.owner_id === currentUserId) return -1;
-      
-      return statusOrder[a.status as keyof typeof statusOrder] - 
-             statusOrder[b.status as keyof typeof statusOrder];
-    }),
-    nextPage: tools.length === ITEMS_PER_PAGE ? pageParam + 1 : undefined
-  };
+  return processedTools.sort((a, b) => {
+    if (a.owner_id === currentUserId && b.owner_id !== currentUserId) return 1;
+    if (a.owner_id !== currentUserId && b.owner_id === currentUserId) return -1;
+    
+    return statusOrder[a.status as keyof typeof statusOrder] - 
+           statusOrder[b.status as keyof typeof statusOrder];
+  });
 };
 
 const Index = () => {
-  const queryClient = useQueryClient();
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+  const { data: tools, isLoading } = useQuery({
     queryKey: ['tools'],
     queryFn: fetchTools,
-    getNextPageParam: (lastPage) => lastPage.nextPage,
-    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-    gcTime: 1000 * 60 * 30, // Keep cache for 30 minutes
   });
-
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userProfile, setUserProfile] = useState<{ username?: string | null, email?: string | null, avatar_url?: string | null } | null>(null);
-
-  // Prefetch next page
-  useEffect(() => {
-    if (data?.pages?.length) {
-      const nextPage = Math.ceil(data.pages.length / ITEMS_PER_PAGE);
-      queryClient.prefetchQuery({
-        queryKey: ['tools', nextPage],
-        queryFn: () => fetchTools({ pageParam: nextPage }),
-      });
-    }
-  }, [data?.pages?.length, queryClient]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -142,9 +113,7 @@ const Index = () => {
     }
   };
 
-  const allTools = data?.pages.flatMap(page => page.items) ?? [];
-  
-  const filteredTools = allTools.filter(tool => {
+  const filteredTools = tools?.filter(tool => {
     const matchesCategory = selectedCategory 
       ? tool.categories.includes(selectedCategory)
       : true;
@@ -173,9 +142,6 @@ const Index = () => {
           tools={filteredTools}
           isLoading={isLoading}
           isAuthenticated={!!isAuthenticated}
-          onLoadMore={fetchNextPage}
-          hasMore={!!hasNextPage}
-          isLoadingMore={isFetchingNextPage}
         />
       </main>
 
