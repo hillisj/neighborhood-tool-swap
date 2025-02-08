@@ -19,6 +19,8 @@ export const useToolDetail = (id: string) => {
           condition,
           maintenance_notes,
           purchase_date,
+          created_at,
+          updated_at,
           owner_id,
           profiles:owner_id (
             username,
@@ -32,9 +34,8 @@ export const useToolDetail = (id: string) => {
       return data;
     },
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-    cacheTime: 1000 * 60 * 30, // Keep cache for 30 minutes
+    gcTime: 1000 * 60 * 30, // Keep cache for 30 minutes
   });
 
   return { tool, loadingTool };
 };
-

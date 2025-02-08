@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { LibraryHeader } from "@/components/library/LibraryHeader";
@@ -41,7 +40,6 @@ const fetchTools = async ({ pageParam = 0 }) => {
 
   if (toolsError) throw toolsError;
 
-  // Fetch categories for this batch of tools only
   const toolIds = tools.map(tool => tool.id);
   const { data: categories, error: categoriesError } = await supabase
     .from('tool_categories')
@@ -50,7 +48,6 @@ const fetchTools = async ({ pageParam = 0 }) => {
 
   if (categoriesError) throw categoriesError;
 
-  // Create a map of tool_id to categories
   const toolCategories = categories.reduce((acc: { [key: string]: ToolCategory[] }, curr) => {
     if (!acc[curr.tool_id]) {
       acc[curr.tool_id] = [];
@@ -73,22 +70,26 @@ const fetchTools = async ({ pageParam = 0 }) => {
     'checked_out': 2
   };
 
-  return processedTools.sort((a, b) => {
-    if (a.owner_id === currentUserId && b.owner_id !== currentUserId) return 1;
-    if (a.owner_id !== currentUserId && b.owner_id === currentUserId) return -1;
-    
-    return statusOrder[a.status as keyof typeof statusOrder] - 
-           statusOrder[b.status as keyof typeof statusOrder];
-  });
+  return {
+    items: processedTools.sort((a, b) => {
+      if (a.owner_id === currentUserId && b.owner_id !== currentUserId) return 1;
+      if (a.owner_id !== currentUserId && b.owner_id === currentUserId) return -1;
+      
+      return statusOrder[a.status as keyof typeof statusOrder] - 
+             statusOrder[b.status as keyof typeof statusOrder];
+    }),
+    nextPage: tools.length === ITEMS_PER_PAGE ? pageParam + 1 : undefined
+  };
 };
 
 const Index = () => {
   const queryClient = useQueryClient();
-  const { data: tools, isLoading, fetchNextPage, hasNextPage } = useQuery({
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ['tools'],
     queryFn: fetchTools,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-    cacheTime: 1000 * 60 * 30, // Keep cache for 30 minutes
+    gcTime: 1000 * 60 * 30, // Keep cache for 30 minutes
   });
 
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory | null>(null);
@@ -98,14 +99,14 @@ const Index = () => {
 
   // Prefetch next page
   useEffect(() => {
-    if (tools?.length) {
-      const nextPage = Math.ceil(tools.length / ITEMS_PER_PAGE);
+    if (data?.pages?.length) {
+      const nextPage = Math.ceil(data.pages.length / ITEMS_PER_PAGE);
       queryClient.prefetchQuery({
         queryKey: ['tools', nextPage],
         queryFn: () => fetchTools({ pageParam: nextPage }),
       });
     }
-  }, [tools, queryClient]);
+  }, [data?.pages?.length, queryClient]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -141,17 +142,17 @@ const Index = () => {
     }
   };
 
-  const filteredTools = tools?.pages?.flatMap(page => 
-    page.filter(tool => {
-      const matchesCategory = selectedCategory 
-        ? tool.categories.includes(selectedCategory)
-        : true;
-      const matchesSearch = searchQuery.trim() === '' ? true : 
-        tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        tool.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    })
-  ) ?? [];
+  const allTools = data?.pages.flatMap(page => page.items) ?? [];
+  
+  const filteredTools = allTools.filter(tool => {
+    const matchesCategory = selectedCategory 
+      ? tool.categories.includes(selectedCategory)
+      : true;
+    const matchesSearch = searchQuery.trim() === '' ? true : 
+      tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tool.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -172,8 +173,9 @@ const Index = () => {
           tools={filteredTools}
           isLoading={isLoading}
           isAuthenticated={!!isAuthenticated}
-          onLoadMore={() => fetchNextPage()}
+          onLoadMore={fetchNextPage}
           hasMore={!!hasNextPage}
+          isLoadingMore={isFetchingNextPage}
         />
       </main>
 
@@ -183,4 +185,3 @@ const Index = () => {
 };
 
 export default Index;
-

@@ -12,9 +12,11 @@ export const useToolRequests = (id: string) => {
           id,
           status,
           created_at,
+          updated_at,
           due_date,
           return_date,
           requester_id,
+          tool_id,
           profiles:requester_id (
             username,
             email,
@@ -28,7 +30,7 @@ export const useToolRequests = (id: string) => {
       return data;
     },
     staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
-    cacheTime: 1000 * 60 * 30, // Keep cache for 30 minutes
+    gcTime: 1000 * 60 * 30, // Keep cache for 30 minutes
   });
 
   return { requests, loadingRequests };
