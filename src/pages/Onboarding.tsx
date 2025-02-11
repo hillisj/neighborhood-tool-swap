@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,9 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { useLoadScript } from "@react-google-maps/api";
+
+// Define libraries array outside component to prevent recreating it on each render
+const libraries: ("places")[] = ["places"];
 
 const Onboarding = () => {
   const navigate = useNavigate();
@@ -65,8 +68,6 @@ const Onboarding = () => {
         
         if (data?.value) {
           console.log('API key retrieved successfully');
-          // Log the first few characters of the API key to verify it's not empty
-          console.log('API key starts with:', data.value.substring(0, 5));
           setApiKey(data.value);
         } else {
           console.error('No API key found in response');
@@ -83,25 +84,11 @@ const Onboarding = () => {
     loadApiKey();
   }, []);
 
-  // Log when the API key changes
-  useEffect(() => {
-    console.log('API key state updated:', apiKey ? 'Key present' : 'No key');
-  }, [apiKey]);
-
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: apiKey,
-    libraries: ["places"]
+    libraries,
+    language: "en",
   });
-
-  // Log Google Maps loading status
-  useEffect(() => {
-    if (loadError) {
-      console.error('Google Maps load error:', loadError);
-    }
-    if (isLoaded) {
-      console.log('Google Maps script loaded successfully');
-    }
-  }, [isLoaded, loadError]);
 
   useEffect(() => {
     if (!isLoaded || !window.google || loadError) return;
