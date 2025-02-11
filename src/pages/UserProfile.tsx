@@ -21,6 +21,12 @@ type Secret = {
   updated_at: string;
 };
 
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
+
 const UserProfile = () => {
   const {
     profile,
