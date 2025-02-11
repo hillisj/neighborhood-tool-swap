@@ -51,30 +51,6 @@ export type Database = {
         }
         Relationships: []
       }
-      secrets: {
-        Row: {
-          created_at: string | null
-          id: string
-          key: string
-          updated_at: string | null
-          value: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          key: string
-          updated_at?: string | null
-          value: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          key?: string
-          updated_at?: string | null
-          value?: string
-        }
-        Relationships: []
-      }
       tool_categories: {
         Row: {
           category: Database["public"]["Enums"]["tool_category"]

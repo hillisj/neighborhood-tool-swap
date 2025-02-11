@@ -14,7 +14,6 @@ export const useProfile = () => {
   const [addressCity, setAddressCity] = useState("");
   const [addressState, setAddressState] = useState("");
   const [addressZip, setAddressZip] = useState("");
-  const [address, setAddress] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const { toast: toastNotification } = useToast();
@@ -98,8 +97,6 @@ export const useProfile = () => {
     setAddressState,
     addressZip,
     setAddressZip,
-    address,
-    setAddress,
     isEditing,
     setIsEditing,
     isUploading,
