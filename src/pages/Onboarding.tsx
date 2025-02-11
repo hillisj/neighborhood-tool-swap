@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,16 +7,95 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { useLoadScript } from "@react-google-maps/api";
 
 const Onboarding = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const [addressStreet, setAddressStreet] = useState("");
-  const [addressCity, setAddressCity] = useState("");
-  const [addressState, setAddressState] = useState("");
-  const [addressZip, setAddressZip] = useState("");
+  const [address, setAddress] = useState("");
+  const [addressDetails, setAddressDetails] = useState({
+    street: "",
+    city: "",
+    state: "",
+    zip: ""
+  });
+  const [apiKey, setApiKey] = useState<string>("");
+
+  useEffect(() => {
+    const loadApiKey = async () => {
+      const { data, error } = await supabase
+        .from('secrets')
+        .select('value')
+        .eq('key', 'google_maps_api_key')
+        .single();
+      
+      if (error) {
+        console.error('Error loading API key:', error);
+        return;
+      }
+      
+      setApiKey(data.value);
+    };
+
+    loadApiKey();
+  }, []);
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: apiKey,
+    libraries: ["places"]
+  });
+
+  useEffect(() => {
+    if (!isLoaded || !window.google) return;
+
+    const input = document.getElementById("address-input") as HTMLInputElement;
+    const autocomplete = new window.google.maps.places.Autocomplete(input, {
+      componentRestrictions: { country: "us" },
+      fields: ["address_components"]
+    });
+
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      if (!place.address_components) return;
+
+      let streetNumber = "";
+      let streetName = "";
+      let city = "";
+      let state = "";
+      let zip = "";
+
+      for (const component of place.address_components) {
+        const type = component.types[0];
+        switch (type) {
+          case "street_number":
+            streetNumber = component.long_name;
+            break;
+          case "route":
+            streetName = component.long_name;
+            break;
+          case "locality":
+            city = component.long_name;
+            break;
+          case "administrative_area_level_1":
+            state = component.short_name;
+            break;
+          case "postal_code":
+            zip = component.long_name;
+            break;
+        }
+      }
+
+      setAddress(`${streetNumber} ${streetName}`);
+      setAddressDetails({
+        street: `${streetNumber} ${streetName}`,
+        city,
+        state,
+        zip
+      });
+    });
+  }, [isLoaded]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,10 +109,10 @@ const Onboarding = () => {
         .update({
           username,
           avatar_url: avatarUrl,
-          address_street: addressStreet,
-          address_city: addressCity,
-          address_state: addressState,
-          address_zip: addressZip,
+          address_street: addressDetails.street,
+          address_city: addressDetails.city,
+          address_state: addressDetails.state,
+          address_zip: addressDetails.zip,
         })
         .eq('id', user.id);
 
@@ -80,56 +159,21 @@ const Onboarding = () => {
             </div>
 
             <div>
-              <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
-                Street Address
+              <label htmlFor="address-input" className="block text-sm font-medium text-gray-700 mb-1">
+                Address
               </label>
               <Input
-                id="street"
-                value={addressStreet}
-                onChange={(e) => setAddressStreet(e.target.value)}
-                placeholder="123 Main St"
+                id="address-input"
+                type="text"
+                placeholder="Start typing your address..."
+                className="w-full"
                 required
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                  City
-                </label>
-                <Input
-                  id="city"
-                  value={addressCity}
-                  onChange={(e) => setAddressCity(e.target.value)}
-                  placeholder="City"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
-                  State
-                </label>
-                <Input
-                  id="state"
-                  value={addressState}
-                  onChange={(e) => setAddressState(e.target.value)}
-                  placeholder="State"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="zip" className="block text-sm font-medium text-gray-700 mb-1">
-                ZIP Code
-              </label>
-              <Input
-                id="zip"
-                value={addressZip}
-                onChange={(e) => setAddressZip(e.target.value)}
-                placeholder="ZIP Code"
-                required
-              />
+              {!isLoaded && (
+                <p className="text-sm text-gray-500 mt-1">Loading address autocomplete...</p>
+              )}
             </div>
           </div>
 
