@@ -6,12 +6,20 @@ import { useProfile } from "@/hooks/useProfile";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { BottomNav } from "@/components/BottomNav";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLoadScript } from "@react-google-maps/api";
 
 const libraries: ("places")[] = ["places"];
+
+type Secret = {
+  id: string;
+  key: string;
+  value: string;
+  created_at: string;
+  updated_at: string;
+};
 
 const UserProfile = () => {
   const {
@@ -42,7 +50,7 @@ const UserProfile = () => {
   } = useProfile();
 
   // Fetch the Google Maps API key from Supabase
-  const { data: apiKeyData } = useQuery({
+  const { data: secretData } = useQuery({
     queryKey: ['google-maps-api-key'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -50,17 +58,17 @@ const UserProfile = () => {
 
       const { data, error } = await supabase
         .from('secrets')
-        .select('value')
+        .select('*')
         .eq('key', 'google_maps_api_key')
         .single();
 
       if (error) throw error;
-      return data?.value;
+      return data as Secret;
     },
   });
 
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey: apiKeyData || "",
+    googleMapsApiKey: secretData?.value || "",
     libraries,
   });
 
