@@ -25,9 +25,28 @@ const Onboarding = () => {
   const [isApiKeyLoading, setIsApiKeyLoading] = useState(true);
 
   useEffect(() => {
+    const checkUserSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Please sign in to access this page');
+        navigate('/auth');
+        return;
+      }
+    };
+
+    checkUserSession();
+  }, [navigate]);
+
+  useEffect(() => {
     const loadApiKey = async () => {
       try {
         setIsApiKeyLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.error('No authenticated session found');
+          return;
+        }
+
         const { data, error } = await supabase
           .from('secrets')
           .select('value')
@@ -43,6 +62,9 @@ const Onboarding = () => {
         if (data?.value) {
           console.log('API key loaded successfully');
           setApiKey(data.value);
+        } else {
+          console.error('No API key found');
+          toast.error('Google Maps API key not found');
         }
       } catch (err) {
         console.error('Error in loadApiKey:', err);
@@ -201,6 +223,7 @@ const Onboarding = () => {
                 required
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
+                disabled={!isLoaded || isApiKeyLoading}
               />
               {isApiKeyLoading && (
                 <p className="text-sm text-gray-500 mt-1">Loading Google Maps...</p>
@@ -209,7 +232,9 @@ const Onboarding = () => {
                 <p className="text-sm text-gray-500 mt-1">Initializing address autocomplete...</p>
               )}
               {loadError && (
-                <p className="text-sm text-red-500 mt-1">Error loading Google Maps</p>
+                <p className="text-sm text-red-500 mt-1">
+                  Error loading Google Maps: {loadError.message}
+                </p>
               )}
             </div>
           </div>
