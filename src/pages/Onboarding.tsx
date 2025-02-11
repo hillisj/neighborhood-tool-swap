@@ -41,11 +41,15 @@ const Onboarding = () => {
     const loadApiKey = async () => {
       try {
         setIsApiKeyLoading(true);
+        console.log('Starting API key load process...');
+        
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
           console.error('No authenticated session found');
+          toast.error('Authentication required');
           return;
         }
+        console.log('User is authenticated, fetching API key...');
 
         const { data, error } = await supabase
           .from('secrets')
@@ -60,10 +64,12 @@ const Onboarding = () => {
         }
         
         if (data?.value) {
-          console.log('API key loaded successfully');
+          console.log('API key retrieved successfully');
+          // Log the first few characters of the API key to verify it's not empty
+          console.log('API key starts with:', data.value.substring(0, 5));
           setApiKey(data.value);
         } else {
-          console.error('No API key found');
+          console.error('No API key found in response');
           toast.error('Google Maps API key not found');
         }
       } catch (err) {
@@ -77,10 +83,25 @@ const Onboarding = () => {
     loadApiKey();
   }, []);
 
+  // Log when the API key changes
+  useEffect(() => {
+    console.log('API key state updated:', apiKey ? 'Key present' : 'No key');
+  }, [apiKey]);
+
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: apiKey,
     libraries: ["places"]
   });
+
+  // Log Google Maps loading status
+  useEffect(() => {
+    if (loadError) {
+      console.error('Google Maps load error:', loadError);
+    }
+    if (isLoaded) {
+      console.log('Google Maps script loaded successfully');
+    }
+  }, [isLoaded, loadError]);
 
   useEffect(() => {
     if (!isLoaded || !window.google || loadError) return;
@@ -174,10 +195,6 @@ const Onboarding = () => {
     }
   };
 
-  if (loadError) {
-    console.error('Google Maps load error:', loadError);
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <Card className="max-w-md mx-auto p-6 mt-8">
@@ -226,10 +243,10 @@ const Onboarding = () => {
                 disabled={!isLoaded || isApiKeyLoading}
               />
               {isApiKeyLoading && (
-                <p className="text-sm text-gray-500 mt-1">Loading Google Maps...</p>
+                <p className="text-sm text-gray-500 mt-1">Loading Google Maps API key...</p>
               )}
               {!isApiKeyLoading && !isLoaded && (
-                <p className="text-sm text-gray-500 mt-1">Initializing address autocomplete...</p>
+                <p className="text-sm text-gray-500 mt-1">Initializing Google Maps...</p>
               )}
               {loadError && (
                 <p className="text-sm text-red-500 mt-1">
