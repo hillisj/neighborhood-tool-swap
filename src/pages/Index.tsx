@@ -84,25 +84,25 @@ const fetchToolsPage = async ({ pageParam = 0 }) => {
 };
 
 const Index = () => {
-  // Add the new secret test query
-  const { data: secretData } = useQuery({
+  // Update the query to use the new api_keys table
+  const { data: apiKeyData } = useQuery({
     queryKey: ['google-maps-api-key'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
       const { data, error } = await supabase
-        .from('secrets')
-        .select('*')
-        .eq('key', 'google_maps_api_key')
-        .single();
+        .from('api_keys')
+        .select('key_value')
+        .eq('key_name', 'google_maps_api_key')
+        .maybeSingle();
 
       if (error) {
-        console.error('Error fetching secret:', error);
+        console.error('Error fetching API key:', error);
         throw error;
       }
       
-      console.log('Secret data:', data);
+      console.log('API key data:', data);
       return data;
     },
   });
