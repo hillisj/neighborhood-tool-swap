@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { LibraryHeader } from "@/components/library/LibraryHeader";
@@ -84,29 +83,6 @@ const fetchToolsPage = async ({ pageParam = 0 }) => {
 };
 
 const Index = () => {
-  // Update the query to use the new api_keys table
-  const { data: apiKeyData } = useQuery({
-    queryKey: ['google-maps-api-key'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { data, error } = await supabase
-        .from('api_keys')
-        .select('key_value')
-        .eq('key_name', 'google_maps_api_key')
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching API key:', error);
-        throw error;
-      }
-      
-      console.log('API key data:', data);
-      return data;
-    },
-  });
-
   const { 
     data,
     fetchNextPage,

@@ -6,9 +6,12 @@ import { useProfile } from "@/hooks/useProfile";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { BottomNav } from "@/components/BottomNav";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useLoadScript } from "@react-google-maps/api";
+
+const libraries: ("places")[] = ["places"];
 
 const UserProfile = () => {
   const {
@@ -19,10 +22,6 @@ const UserProfile = () => {
     setBio,
     avatarUrl,
     setAvatarUrl,
-    isEditing,
-    setIsEditing,
-    isUploading,
-    setIsUploading,
     addressStreet,
     setAddressStreet,
     addressCity,
@@ -31,10 +30,103 @@ const UserProfile = () => {
     setAddressState,
     addressZip,
     setAddressZip,
+    address,
+    setAddress,
+    isEditing,
+    setIsEditing,
+    isUploading,
+    setIsUploading,
     handleSave,
     handleLogout,
     refetch
   } = useProfile();
+
+  // Fetch the Google Maps API key from Supabase
+  const { data: apiKeyData } = useQuery({
+    queryKey: ['google-maps-api-key'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from('secrets')
+        .select('value')
+        .eq('key', 'google_maps_api_key')
+        .single();
+
+      if (error) throw error;
+      return data?.value;
+    },
+  });
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: apiKeyData || "",
+    libraries,
+  });
+
+  useEffect(() => {
+    if (isLoaded && window.google) {
+      const input = document.getElementById("address-input") as HTMLInputElement;
+      if (!input) return;
+
+      const autocomplete = new window.google.maps.places.Autocomplete(input, {
+        componentRestrictions: { country: "us" },
+        fields: ["address_components"],
+      });
+
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (!place.address_components) return;
+
+        let streetNumber = "";
+        let streetName = "";
+        let city = "";
+        let state = "";
+        let zip = "";
+
+        for (const component of place.address_components) {
+          const type = component.types[0];
+          switch (type) {
+            case "street_number":
+              streetNumber = component.long_name;
+              break;
+            case "route":
+              streetName = component.long_name;
+              break;
+            case "locality":
+              city = component.long_name;
+              break;
+            case "administrative_area_level_1":
+              state = component.short_name;
+              break;
+            case "postal_code":
+              zip = component.long_name;
+              break;
+          }
+        }
+
+        const fullStreet = `${streetNumber} ${streetName}`.trim();
+        setAddressStreet(fullStreet);
+        setAddressCity(city);
+        setAddressState(state);
+        setAddressZip(zip);
+        setAddress(fullStreet);
+      });
+    }
+  }, [isLoaded, setAddressStreet, setAddressCity, setAddressState, setAddressZip, setAddress]);
+
+  useEffect(() => {
+    if (profile) {
+      setUsername(profile.username || "");
+      setBio(profile.bio || "");
+      setAvatarUrl(profile.avatar_url || "");
+      setAddressStreet(profile.address_street || "");
+      setAddressCity(profile.address_city || "");
+      setAddressState(profile.address_state || "");
+      setAddressZip(profile.address_zip || "");
+      setAddress(profile.address_street || "");
+    }
+  }, [profile]);
 
   const { data: lendingCount } = useQuery({
     queryKey: ['lending-count', profile?.id],
@@ -67,18 +159,6 @@ const UserProfile = () => {
     },
     enabled: !!profile?.id,
   });
-
-  useEffect(() => {
-    if (profile) {
-      setUsername(profile.username || "");
-      setBio(profile.bio || "");
-      setAvatarUrl(profile.avatar_url || "");
-      setAddressStreet(profile.address_street || "");
-      setAddressCity(profile.address_city || "");
-      setAddressState(profile.address_state || "");
-      setAddressZip(profile.address_zip || "");
-    }
-  }, [profile]);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -139,25 +219,15 @@ const UserProfile = () => {
           {isEditing ? (
             <div className="space-y-3">
               <Input
-                placeholder="Street Address"
-                value={addressStreet}
-                onChange={(e) => setAddressStreet(e.target.value)}
+                id="address-input"
+                placeholder="Start typing your address..."
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                disabled={!isLoaded}
               />
-              <Input
-                placeholder="City"
-                value={addressCity}
-                onChange={(e) => setAddressCity(e.target.value)}
-              />
-              <Input
-                placeholder="State"
-                value={addressState}
-                onChange={(e) => setAddressState(e.target.value)}
-              />
-              <Input
-                placeholder="ZIP Code"
-                value={addressZip}
-                onChange={(e) => setAddressZip(e.target.value)}
-              />
+              {!isLoaded && (
+                <p className="text-sm text-gray-500">Loading Google Maps...</p>
+              )}
             </div>
           ) : (
             <div className="text-gray-600">
