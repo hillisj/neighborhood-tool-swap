@@ -11,6 +11,10 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          address_city: string | null
+          address_state: string | null
+          address_street: string | null
+          address_zip: string | null
           avatar_url: string | null
           bio: string | null
           email: string | null
@@ -20,6 +24,10 @@ export type Database = {
           username: string | null
         }
         Insert: {
+          address_city?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
           avatar_url?: string | null
           bio?: string | null
           email?: string | null
@@ -29,6 +37,10 @@ export type Database = {
           username?: string | null
         }
         Update: {
+          address_city?: string | null
+          address_state?: string | null
+          address_street?: string | null
+          address_zip?: string | null
           avatar_url?: string | null
           bio?: string | null
           email?: string | null

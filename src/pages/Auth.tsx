@@ -97,9 +97,21 @@ export default function Auth() {
           .eq('id', user.id);
 
         if (profileError) throw profileError;
-      }
 
-      navigate("/");
+        // Check if user has completed onboarding
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username, avatar_url')
+          .eq('id', user.id)
+          .single();
+
+        // Redirect to onboarding if profile is incomplete
+        if (!profile?.username || !profile?.avatar_url) {
+          navigate("/onboarding");
+        } else {
+          navigate("/");
+        }
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
