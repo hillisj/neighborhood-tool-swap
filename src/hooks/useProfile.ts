@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +10,10 @@ export const useProfile = () => {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [addressStreet, setAddressStreet] = useState("");
+  const [addressCity, setAddressCity] = useState("");
+  const [addressState, setAddressState] = useState("");
+  const [addressZip, setAddressZip] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const { toast: toastNotification } = useToast();
@@ -42,6 +47,10 @@ export const useProfile = () => {
           username,
           bio,
           avatar_url: avatarUrl,
+          address_street: addressStreet,
+          address_city: addressCity,
+          address_state: addressState,
+          address_zip: addressZip,
         })
         .eq('id', user.id);
 
@@ -80,6 +89,14 @@ export const useProfile = () => {
     setBio,
     avatarUrl,
     setAvatarUrl,
+    addressStreet,
+    setAddressStreet,
+    addressCity,
+    setAddressCity,
+    addressState,
+    setAddressState,
+    addressZip,
+    setAddressZip,
     isEditing,
     setIsEditing,
     isUploading,

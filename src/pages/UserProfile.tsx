@@ -23,6 +23,14 @@ const UserProfile = () => {
     setIsEditing,
     isUploading,
     setIsUploading,
+    addressStreet,
+    setAddressStreet,
+    addressCity,
+    setAddressCity,
+    addressState,
+    setAddressState,
+    addressZip,
+    setAddressZip,
     handleSave,
     handleLogout,
     refetch
@@ -65,6 +73,10 @@ const UserProfile = () => {
       setUsername(profile.username || "");
       setBio(profile.bio || "");
       setAvatarUrl(profile.avatar_url || "");
+      setAddressStreet(profile.address_street || "");
+      setAddressCity(profile.address_city || "");
+      setAddressState(profile.address_state || "");
+      setAddressZip(profile.address_zip || "");
     }
   }, [profile]);
 
@@ -119,6 +131,45 @@ const UserProfile = () => {
             />
           ) : (
             <p className="text-gray-600">{bio || "No bio yet"}</p>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Address</h3>
+          {isEditing ? (
+            <div className="space-y-3">
+              <Input
+                placeholder="Street Address"
+                value={addressStreet}
+                onChange={(e) => setAddressStreet(e.target.value)}
+              />
+              <Input
+                placeholder="City"
+                value={addressCity}
+                onChange={(e) => setAddressCity(e.target.value)}
+              />
+              <Input
+                placeholder="State"
+                value={addressState}
+                onChange={(e) => setAddressState(e.target.value)}
+              />
+              <Input
+                placeholder="ZIP Code"
+                value={addressZip}
+                onChange={(e) => setAddressZip(e.target.value)}
+              />
+            </div>
+          ) : (
+            <div className="text-gray-600">
+              {addressStreet ? (
+                <>
+                  <p>{addressStreet}</p>
+                  <p>{addressCity}, {addressState} {addressZip}</p>
+                </>
+              ) : (
+                <p>No address provided</p>
+              )}
+            </div>
           )}
         </div>
 
