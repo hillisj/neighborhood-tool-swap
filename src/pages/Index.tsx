@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BottomNav } from "@/components/BottomNav";
 import { LibraryHeader } from "@/components/library/LibraryHeader";
@@ -83,6 +84,29 @@ const fetchToolsPage = async ({ pageParam = 0 }) => {
 };
 
 const Index = () => {
+  // Add the new secret test query
+  const { data: secretData } = useQuery({
+    queryKey: ['google-maps-api-key'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from('secrets')
+        .select('*')
+        .eq('key', 'google_maps_api_key')
+        .single();
+
+      if (error) {
+        console.error('Error fetching secret:', error);
+        throw error;
+      }
+      
+      console.log('Secret data:', data);
+      return data;
+    },
+  });
+
   const { 
     data,
     fetchNextPage,
