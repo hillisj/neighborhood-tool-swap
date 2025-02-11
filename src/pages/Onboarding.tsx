@@ -22,80 +22,107 @@ const Onboarding = () => {
     zip: ""
   });
   const [apiKey, setApiKey] = useState<string>("");
+  const [isApiKeyLoading, setIsApiKeyLoading] = useState(true);
 
   useEffect(() => {
     const loadApiKey = async () => {
-      const { data, error } = await supabase
-        .from('secrets')
-        .select('value')
-        .eq('key', 'google_maps_api_key')
-        .single();
-      
-      if (error) {
-        console.error('Error loading API key:', error);
-        return;
+      try {
+        setIsApiKeyLoading(true);
+        const { data, error } = await supabase
+          .from('secrets')
+          .select('value')
+          .eq('key', 'google_maps_api_key')
+          .single();
+        
+        if (error) {
+          console.error('Error loading API key:', error);
+          toast.error('Failed to load Google Maps API key');
+          return;
+        }
+        
+        if (data?.value) {
+          console.log('API key loaded successfully');
+          setApiKey(data.value);
+        }
+      } catch (err) {
+        console.error('Error in loadApiKey:', err);
+        toast.error('Failed to load Google Maps API key');
+      } finally {
+        setIsApiKeyLoading(false);
       }
-      
-      setApiKey(data.value);
     };
 
     loadApiKey();
   }, []);
 
-  const { isLoaded } = useLoadScript({
+  const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: apiKey,
     libraries: ["places"]
   });
 
   useEffect(() => {
-    if (!isLoaded || !window.google) return;
+    if (!isLoaded || !window.google || loadError) return;
 
+    console.log('Initializing Google Maps Autocomplete');
     const input = document.getElementById("address-input") as HTMLInputElement;
-    const autocomplete = new window.google.maps.places.Autocomplete(input, {
-      componentRestrictions: { country: "us" },
-      fields: ["address_components"]
-    });
+    if (!input) {
+      console.error('Address input element not found');
+      return;
+    }
 
-    autocomplete.addListener("place_changed", () => {
-      const place = autocomplete.getPlace();
-      if (!place.address_components) return;
-
-      let streetNumber = "";
-      let streetName = "";
-      let city = "";
-      let state = "";
-      let zip = "";
-
-      for (const component of place.address_components) {
-        const type = component.types[0];
-        switch (type) {
-          case "street_number":
-            streetNumber = component.long_name;
-            break;
-          case "route":
-            streetName = component.long_name;
-            break;
-          case "locality":
-            city = component.long_name;
-            break;
-          case "administrative_area_level_1":
-            state = component.short_name;
-            break;
-          case "postal_code":
-            zip = component.long_name;
-            break;
-        }
-      }
-
-      setAddress(`${streetNumber} ${streetName}`);
-      setAddressDetails({
-        street: `${streetNumber} ${streetName}`,
-        city,
-        state,
-        zip
+    try {
+      const autocomplete = new window.google.maps.places.Autocomplete(input, {
+        componentRestrictions: { country: "us" },
+        fields: ["address_components"]
       });
-    });
-  }, [isLoaded]);
+
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (!place.address_components) {
+          console.error('No address components found in place result');
+          return;
+        }
+
+        let streetNumber = "";
+        let streetName = "";
+        let city = "";
+        let state = "";
+        let zip = "";
+
+        for (const component of place.address_components) {
+          const type = component.types[0];
+          switch (type) {
+            case "street_number":
+              streetNumber = component.long_name;
+              break;
+            case "route":
+              streetName = component.long_name;
+              break;
+            case "locality":
+              city = component.long_name;
+              break;
+            case "administrative_area_level_1":
+              state = component.short_name;
+              break;
+            case "postal_code":
+              zip = component.long_name;
+              break;
+          }
+        }
+
+        setAddress(`${streetNumber} ${streetName}`);
+        setAddressDetails({
+          street: `${streetNumber} ${streetName}`,
+          city,
+          state,
+          zip
+        });
+      });
+    } catch (err) {
+      console.error('Error initializing Google Maps Autocomplete:', err);
+      toast.error('Error initializing address autocomplete');
+    }
+  }, [isLoaded, loadError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,6 +151,10 @@ const Onboarding = () => {
       toast.error(error.message);
     }
   };
+
+  if (loadError) {
+    console.error('Google Maps load error:', loadError);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -171,8 +202,14 @@ const Onboarding = () => {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
               />
-              {!isLoaded && (
-                <p className="text-sm text-gray-500 mt-1">Loading address autocomplete...</p>
+              {isApiKeyLoading && (
+                <p className="text-sm text-gray-500 mt-1">Loading Google Maps...</p>
+              )}
+              {!isApiKeyLoading && !isLoaded && (
+                <p className="text-sm text-gray-500 mt-1">Initializing address autocomplete...</p>
+              )}
+              {loadError && (
+                <p className="text-sm text-red-500 mt-1">Error loading Google Maps</p>
               )}
             </div>
           </div>
